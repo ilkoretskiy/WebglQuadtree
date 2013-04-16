@@ -60,7 +60,7 @@ var Cube = function(ShaderManager){
 		var drawOrder = []	
 		generateSurface(verticies, drawOrder);
 
-		mat4.identity(MVMatrix);
+		mat4.identity(MVMatrix);		
 		mat4.translate(MVMatrix, MVMatrix, [0, 0, -1])				
 		mat4.identity(PMatrix);
 				

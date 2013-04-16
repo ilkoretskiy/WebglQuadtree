@@ -1,7 +1,10 @@
 var vertexPositionAttribute  = {}
 var canvas = {}
 var ground = {}
-var objects = []
+
+var Objects = []
+var GroundObjects = []
+
 var shaderManager = {}
 var pMatrix = {}
 function onLoad()
@@ -25,7 +28,7 @@ function onLoad()
 	initBuffers();	
 	
 	global_angle = 0;
-	setInterval(update, 30);
+	setInterval(update, 80);
 	//update();
 }
 
@@ -45,24 +48,97 @@ function initBuffers(){
 	var cube = new Cube()
 	cube.setShaderProgram(flatProgram)
 	
-	//objects.push(ground)
-	//objects.push(ground2)
-	objects.push(cube)
-
-	/// unused if update is enabled
-	var g1Matrix =  ground.getMotionMatrix();
-	mat4.translate( g1Matrix, g1Matrix, [0, 0, -1])
-				
-	var g2Matrix =  ground2.getMotionMatrix();
-	mat4.translate(g2Matrix, g2Matrix, [0, 0, -1])	
-	
-	var cubeMatrix =  cube.getMotionMatrix();
-	mat4.translate( cubeMatrix,  cubeMatrix, [0, 0, -10])	
-	///
-	
+	GroundObjects.push(ground)
+	GroundObjects.push(ground2)
+	Objects.push(cube)
+		
 	pMatrix = mat4.create();
 	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
-	//mat4.rotateY(pMatrix, pMatrix, Math.PI * 0.2 / 180.)
+}
+
+var moveDist = [0, -1, -3]
+
+
+//StackMatrix.push
+//StackMatrix.pop 
+
+function MoveObjectToCell(mat, row, col)
+{
+	// TODO get from ground
+	var cellSize = 1
+	var cellCount = 8	
+	var objectLen = 2
+	// translate to 0 0
+	mat4.translate( mat, mat, [objectLen/2, 1, objectLen/2])
+	mat4.translate( mat, mat, [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
+}
+
+
+function DrawGround(){
+	for (var idx = 0; idx < GroundObjects.length; ++idx){
+		var curObject = GroundObjects[idx]
+		curObject.setGlobalTransform(pMatrix)
+		var mat = curObject.getMotionMatrix();		
+				
+		// TODO replace to matrix stack		
+		mat4.identity(mat)
+		mat4.translate( mat, mat, moveDist)
+		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)	
+				
+		mat4.rotateX(mat, mat, Math.PI * 90 / 180.)							
+		curObject.draw()		
+	}	
+}
+
+
+function updateCoord(val)
+{
+	var rnd = Math.random()
+	var shift = 0
+	if (rnd > 0.66)
+	{
+		shift = 1
+	}
+	else if(rnd < 0.33)
+	{
+		shift = 0//-1
+	}
+	val += shift
+	if (val < 0)
+	{
+		val += 8
+	}
+	val %= 8
+	return val
+}
+
+var x = 0
+var y = 0
+function DrawObjects(){
+	var scale = 1/8.
+	//for (var idx = 0; idx < Objects.length; ++idx){
+	var idx = 0
+		var curObject = Objects[idx]
+		curObject.setGlobalTransform(pMatrix)
+		var mat = curObject.getMotionMatrix();
+		
+		// TODO replace to matrix stack		
+		mat4.identity(mat)
+		
+		// lift cube to a half of it size and set initial pos as 0
+		
+		mat4.translate( mat, mat, moveDist)
+		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
+		mat4.scale(mat, mat, [scale, scale, scale])			
+		
+		
+		x = updateCoord(x)
+		y = updateCoord(y)		
+		
+		MoveObjectToCell(mat, y, x)
+				
+		curObject.draw()		
+	//}	
 }
 
 function update()
@@ -72,10 +148,13 @@ function update()
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
 	
 	global_angle = (global_angle + 1) % 360;
-	//global_angle = 30
+	//global_angle = 0
 	
 	// TOTHINK - is this is a good practice to remake convertation matrix every time 
 	
+	DrawGround()
+	DrawObjects()
+	/*
 	for (var idx = 0; idx < objects.length; ++idx){
 		var curObject = objects[idx]
 		curObject.setGlobalTransform(pMatrix)
@@ -83,15 +162,14 @@ function update()
 		//mat4.rotateX(mat, mat, Math.PI * 1 / 180.)
 		
 		mat4.identity(mat)
-		mat4.translate( mat, mat, [0, -0.5, -5])
+		mat4.translate( mat, mat, [0, -0.5, -2])
 		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
 		
 		if (idx == 1){
 			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)						
 		}
 		
-		curObject.draw()
-		
+		curObject.draw()		
 	}	
-	
+	*/
 }

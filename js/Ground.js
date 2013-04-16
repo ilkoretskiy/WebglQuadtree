@@ -9,8 +9,10 @@ var Ground = function(ShaderManager){
 	
 	
 	var generateSurface = function(verticies, drawOrder, columnCount, rowCount){
-		var colNorm = 1 / columnCount;
-		var rowNorm = 1 / rowCount;
+		// we map 0..count to -1,1 
+		
+		var colNorm = 2 / columnCount;
+		var rowNorm = 2 / rowCount;
 		
 		var z = 0
 		for (var row = 0; row < rowCount + 1; ++row)
@@ -48,7 +50,8 @@ var Ground = function(ShaderManager){
 	var _init = function(){
 		verticies = []
 		drawOrder = []
-		generateSurface(verticies, drawOrder, 15, 15)
+		generateSurface(verticies, drawOrder, 8, 8)
+		console.log(verticies)
 					
 		mat4.identity(mvMatrix);
 		mat4.translate(mvMatrix, mvMatrix, [0, 0, -1])				
