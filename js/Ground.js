@@ -18,9 +18,9 @@ var Ground = function(ShaderManager){
 			for (var col = 0; col < columnCount + 1; ++col)
 			{
 				verticies.push.apply(verticies, [(col - columnCount / 2) * colNorm, (row - rowCount / 2) * rowNorm, z])
-				
+				/*
 				var val = Math.random() / 50
-								
+													
 				if (Math.random() > 0.5)
 				{
 					z += val
@@ -29,7 +29,7 @@ var Ground = function(ShaderManager){
 				{
 					z -= val
 				}
-				
+				*/
 				if (col != columnCount && row != rowCount)
 				{
 					var idx = col + row * (columnCount + 1);
@@ -91,8 +91,11 @@ var Ground = function(ShaderManager){
 
 			var aVertex = this.shaderProgram.getVertex()
 			gl.enableVertexAttribArray(aVertex);	
+			
 			gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuffer);			
-			gl.vertexAttribPointer(aVertex, 3, gl.FLOAT, false, 0, 0);		
+			gl.vertexAttribPointer(aVertex, 3, gl.FLOAT, false, 0, 0);
+			
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);			
 			gl.drawElements(gl.LINES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 			
 			gl.disableVertexAttribArray( aVertex)

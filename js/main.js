@@ -42,18 +42,23 @@ function initBuffers(){
 	ground.setShaderProgram(flatProgram)
 	var ground2 = new Ground();
 	ground2.setShaderProgram(flatProgram)
+	var cube = new Cube()
+	cube.setShaderProgram(flatProgram)
 	
-	objects.push(ground)
-	objects.push(ground2)	
+	//objects.push(ground)
+	//objects.push(ground2)
+	objects.push(cube)
 
-
+	/// unused if update is enabled
 	var g1Matrix =  ground.getMotionMatrix();
 	mat4.translate( g1Matrix, g1Matrix, [0, 0, -1])
 				
 	var g2Matrix =  ground2.getMotionMatrix();
 	mat4.translate(g2Matrix, g2Matrix, [0, 0, -1])	
 	
-
+	var cubeMatrix =  cube.getMotionMatrix();
+	mat4.translate( cubeMatrix,  cubeMatrix, [0, 0, -10])	
+	///
 	
 	pMatrix = mat4.create();
 	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
@@ -67,6 +72,7 @@ function update()
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
 	
 	global_angle = (global_angle + 1) % 360;
+	//global_angle = 30
 	
 	// TOTHINK - is this is a good practice to remake convertation matrix every time 
 	
@@ -77,12 +83,11 @@ function update()
 		//mat4.rotateX(mat, mat, Math.PI * 1 / 180.)
 		
 		mat4.identity(mat)
-		mat4.translate( mat, mat, [0, -0.5, -2])
+		mat4.translate( mat, mat, [0, -0.5, -5])
 		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
 		
 		if (idx == 1){
-			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)			
-			
+			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)						
 		}
 		
 		curObject.draw()
