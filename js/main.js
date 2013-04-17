@@ -2,9 +2,9 @@ var vertexPositionAttribute  = {}
 var canvas = {}
 var ground = {}
 
+var Positions = []
 var Objects = []
 var GroundObjects = []
-
 var shaderManager = {}
 var pMatrix = {}
 function onLoad()
@@ -41,16 +41,17 @@ function initShaders(){
 function initBuffers(){
 	var flatProgram = shaderManager.getProgram('flat')
 	
-	var ground = new Ground()
-	ground.setShaderProgram(flatProgram)
-	var ground2 = new Ground();
-	ground2.setShaderProgram(flatProgram)
-	var cube = new Cube()
-	cube.setShaderProgram(flatProgram)
+	GroundObjects.push((new Ground()).setShaderProgram(flatProgram))
+	GroundObjects.push(
+		(new Ground()).setShaderProgram(flatProgram)
+	)
 	
-	GroundObjects.push(ground)
-	GroundObjects.push(ground2)
-	Objects.push(cube)
+	for (var i = 0; i < 5; ++i)
+	{
+		Objects.push((new Cube()).setShaderProgram(flatProgram))
+		Positions.push({x:0, y:0})
+	}
+	
 		
 	pMatrix = mat4.create();
 	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
@@ -62,30 +63,25 @@ var moveDist = [0, -1, -3]
 //StackMatrix.push
 //StackMatrix.pop 
 
-function MoveObjectToCell(mat, row, col)
-{
-	// TODO get from ground
-	var cellSize = 1
-	var cellCount = 8	
-	var objectLen = 2
-	// translate to 0 0
-	mat4.translate( mat, mat, [objectLen/2, 1, objectLen/2])
-	mat4.translate( mat, mat, [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
-}
-
-
 function DrawGround(){
 	for (var idx = 0; idx < GroundObjects.length; ++idx){
 		var curObject = GroundObjects[idx]
-		curObject.setGlobalTransform(pMatrix)
+		curObject.setGlobalTransform(pMatrix)		
 		var mat = curObject.getMotionMatrix();		
 				
 		// TODO replace to matrix stack		
 		mat4.identity(mat)
-		mat4.translate( mat, mat, moveDist)
-		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)	
-				
-		mat4.rotateX(mat, mat, Math.PI * 90 / 180.)							
+		//mat4.translate( mat, mat, moveDist)
+		//mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)	
+		
+		if (idx == 1)
+		{
+			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)				
+		}
+		else
+		{
+			mat4.translate(mat, mat, [0, 1, 1])
+		}
 		curObject.draw()		
 	}	
 }
@@ -101,7 +97,7 @@ function updateCoord(val)
 	}
 	else if(rnd < 0.33)
 	{
-		shift = 0//-1
+		shift = 0
 	}
 	val += shift
 	if (val < 0)
@@ -112,12 +108,23 @@ function updateCoord(val)
 	return val
 }
 
+
+function MoveObjectToCell(mat, row, col)
+{
+	// TODO get from ground
+	var cellSize = 1
+	var cellCount = 8	
+	var objectLen = 2
+	// translate to 0 0
+	mat4.translate( mat, mat, [objectLen/2, 1, objectLen/2])
+	mat4.translate( mat, mat, [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
+}
+
 var x = 0
 var y = 0
 function DrawObjects(){
 	var scale = 1/8.
-	//for (var idx = 0; idx < Objects.length; ++idx){
-	var idx = 0
+	for (var idx = 0; idx < Objects.length; ++idx){		
 		var curObject = Objects[idx]
 		curObject.setGlobalTransform(pMatrix)
 		var mat = curObject.getMotionMatrix();
@@ -127,18 +134,17 @@ function DrawObjects(){
 		
 		// lift cube to a half of it size and set initial pos as 0
 		
-		mat4.translate( mat, mat, moveDist)
-		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
+		//mat4.translate( mat, mat, moveDist)
+		//mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
 		mat4.scale(mat, mat, [scale, scale, scale])			
 		
+		position = Positions[idx]
+		position.x = updateCoord(position.x)
+		position.y = updateCoord(position.y)		
 		
-		x = updateCoord(x)
-		y = updateCoord(y)		
-		
-		MoveObjectToCell(mat, y, x)
-				
+		MoveObjectToCell(mat, position.y, position.x)				
 		curObject.draw()		
-	//}	
+	}	
 }
 
 function update()
@@ -147,29 +153,16 @@ function update()
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
 	
-	global_angle = (global_angle + 1) % 360;
-	//global_angle = 0
+	//global_angle = (global_angle + 1) % 360;
+	global_angle = 90
 	
-	// TOTHINK - is this is a good practice to remake convertation matrix every time 
+	// TOTHINK - is this is a good practice to remake convertation of matrix every time 
+	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
+	
+	// Why reverse order
+	mat4.translate(pMatrix, pMatrix, moveDist)
+	mat4.rotateY(pMatrix, pMatrix,  global_angle * Math.PI / 180 )	
 	
 	DrawGround()
 	DrawObjects()
-	/*
-	for (var idx = 0; idx < objects.length; ++idx){
-		var curObject = objects[idx]
-		curObject.setGlobalTransform(pMatrix)
-		var mat = curObject.getMotionMatrix();
-		//mat4.rotateX(mat, mat, Math.PI * 1 / 180.)
-		
-		mat4.identity(mat)
-		mat4.translate( mat, mat, [0, -0.5, -2])
-		mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
-		
-		if (idx == 1){
-			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)						
-		}
-		
-		curObject.draw()		
-	}	
-	*/
 }

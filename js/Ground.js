@@ -1,6 +1,5 @@
-var Ground = function(ShaderManager){	
-	var shaderManager = ShaderManager,
-		verticies = [],
+var Ground = function(){	
+	var verticies = [],
 		drawOrder = [],
 		uPMatrix = mat4.create(),
 		mvMatrix = mat4.create(),
@@ -20,7 +19,7 @@ var Ground = function(ShaderManager){
 			for (var col = 0; col < columnCount + 1; ++col)
 			{
 				verticies.push.apply(verticies, [(col - columnCount / 2) * colNorm, (row - rowCount / 2) * rowNorm, z])
-				/*
+				
 				var val = Math.random() / 50
 													
 				if (Math.random() > 0.5)
@@ -31,7 +30,7 @@ var Ground = function(ShaderManager){
 				{
 					z -= val
 				}
-				*/
+				
 				if (col != columnCount && row != rowCount)
 				{
 					var idx = col + row * (columnCount + 1);
@@ -54,7 +53,7 @@ var Ground = function(ShaderManager){
 		console.log(verticies)
 					
 		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, mvMatrix, [0, 0, -1])				
+		//mat4.translate(mvMatrix, mvMatrix, [0, 0, -1])				
 		mat4.identity(uPMatrix);
 		
 					
@@ -69,15 +68,15 @@ var Ground = function(ShaderManager){
 	_init()
 	
 	// why i can't do this with this.var = function ?
-	return{
-		init : _init,		
-		
+	return{			
 		setShaderProgram : function(program){
 			this.shaderProgram = program			
+			return this
 		},
 		
 		setGlobalTransform : function(matrix){
 			uPMatrix = matrix			
+			return this
 		},
 		
 		getMotionMatrix : function(){

@@ -1,5 +1,4 @@
-var Cube = function(ShaderManager){
-	var m_shaderManager = ShaderManager
+var Cube = function(){
 	var vertexBuffer = gl.createBuffer();
 	var drawOrderBuffer = gl.createBuffer();
 	var PMatrix = mat4.create();
@@ -60,8 +59,7 @@ var Cube = function(ShaderManager){
 		var drawOrder = []	
 		generateSurface(verticies, drawOrder);
 
-		mat4.identity(MVMatrix);		
-		mat4.translate(MVMatrix, MVMatrix, [0, 0, -1])				
+		mat4.identity(MVMatrix);					
 		mat4.identity(PMatrix);
 				
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer );
@@ -76,17 +74,20 @@ var Cube = function(ShaderManager){
 	
 	return {
 		setShaderProgram : function(program){
-			this.shaderProgram = program			
+			this.shaderProgram = program	
+			//console.log(this)	
+			return this	
 		},
 		
 		setGlobalTransform : function(matrix){
-			PMatrix = matrix			
+			PMatrix = matrix	
+			return this
 		},
 		
 		getMotionMatrix : function(){
 			return MVMatrix
 		},
-		
+				
 		draw : function(){
 			var uPMatrix = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix")
 			var uMVMatrix = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix")

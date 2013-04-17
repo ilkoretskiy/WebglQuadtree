@@ -7,7 +7,7 @@ var flatShader =
 	"uniform mat4 uPMatrix;" +
 	"void main() {			" +	
 	"	gl_PointSize = 10.;" +
-	"	gl_Position = uPMatrix * uMVMatrix * vec4(vPosition, 1.0);" +
+	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);" +
 	"}",
 
 	fs : "void main() {" +
