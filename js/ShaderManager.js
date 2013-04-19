@@ -2,16 +2,50 @@
 var flatShader =
 {
 	title : 'flat',
-	vs : "attribute vec3 vPosition;" + 
-	"uniform mat4 uMVMatrix;" +
-	"uniform mat4 uPMatrix;" +
-	"void main() {			" +	
-	"	gl_PointSize = 10.;" +
-	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);" +
-	"}",
+	vs :
+	"attribute vec3 vPosition;\n" +
+	"attribute vec3 aBarycentric;\n" +
+	"varying vec3 vPosOut;\n" +	
+	"uniform mat4 uMVMatrix;\n" +
+	"uniform mat4 uPMatrix;\n" +
+	"void main() {			\n" +	
+	"	gl_PointSize = 1.;\n" +
+	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);\n" +
+	" 	vPosOut = aBarycentric;\n"+
+	"}\n",
 
-	fs : "void main() {" +
-	"	gl_FragColor = vec4(1.0, 1.0, 0.0, 0.5);" + 
+	fs :	
+	"varying highp vec3 vPosOut;" +
+	"void main() {" +	
+	//"	if(any(lessThan(vPosOut, vec3(10.02)))) " +
+	//"	vPosOut = abs(vPosOut);" + 
+	"	highp float dist = dot(abs(vPosOut), abs(vPosOut));" + 
+	/*
+	"	if(vPosOut.x < 0.95) " +
+	"	{" +
+	"		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); " +
+	"		return;"+
+	"	}" +
+	"	if(vPosOut.y < 0.95) " +
+	"	{" +
+	"		gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); " +
+	"		return;"+
+	"	}" +
+	"	if(vPosOut.z < 0.95) " +
+	"	{" +
+	"		gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0); " +
+	"		return;"+
+	"	}" +		
+	* */
+		//"if (  any(greaterThan( absV, vec3(0.2) )) )"		+
+		"if (  any(lessThan( vPosOut, vec3(0.02) )) )"		+
+		"{" +
+		"	gl_FragColor = vec4(1, 1, 1, 1); " +
+		"}" +
+		"else" +
+		"{" +
+		"	gl_FragColor = vec4(0, 0, 0, .9); " +
+		"}" +
 	"}"
 }
 
@@ -21,8 +55,26 @@ function Program (program){
 		var aVertex = gl.getAttribLocation(this.program, "vPosition")
 		return aVertex
 	}
+	this.getAttr = function(name){
+		var attrib = gl.getAttribLocation(this.program, name)
+		return attrib
+
+	}
 	this.enable = function(){
 		gl.useProgram(this.program)
+	}
+}
+
+
+function verifyShader(stype, shader)
+{
+	if(gl.getShaderParameter(shader, gl.COMPILE_STATUS) == false){
+		var error = gl.getShaderInfoLog(shader);
+		var lines = error.split('\n');
+		for (var i = 0; i < lines.length; ++i)
+		{
+			console.log(stype, lines[i])
+		}
 	}
 }
 
@@ -38,10 +90,12 @@ var ShaderManager = function(){
 			gl.shaderSource(vertexShader, shader.vs)
 			// maybe add some exception catching
 			gl.compileShader(vertexShader)
+			verifyShader('vx', vertexShader)
 			
 			var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
 			gl.shaderSource(fragmentShader, shader.fs)
 			gl.compileShader(fragmentShader)	
+			verifyShader('fs', fragmentShader)
 			
 			var programId = gl.createProgram()
 			gl.attachShader(programId, vertexShader)
@@ -49,8 +103,11 @@ var ShaderManager = function(){
 			gl.linkProgram(programId)
 			
 			if (!gl.getProgramParameter(programId, gl.LINK_STATUS)) {
-				alert("Unable to initialize the shader program.");
+				var error = gl.getProgramInfoLog(programId)
+				console.log("link error " , error)
+				alert("Unable to initialize the shader program. " +  error);
 			}
+			
 			
 			gl.deleteShader(vertexShader)
 			gl.deleteShader(fragmentShader)

@@ -3,8 +3,112 @@ var Cube = function(){
 	var drawOrderBuffer = gl.createBuffer();
 	var PMatrix = mat4.create();
 	var	MVMatrix = mat4.create();
+	var barycentricBuffer = gl.createBuffer()
 		
-	var generateSurface = function(verticies, drawOrder){
+	
+	var generateArray = function(verticies, barycentric){
+		verticies.push.apply(verticies, [
+			-1.0, -1.0, 1.0,
+			1.0, -1.0, 1.0,
+			1.0, 1.0, 1.0,
+			
+			-1.0, -1.0, 1.0,
+			1.0, 1.0, 1.0,
+			-1.0, 1.0, 1.0,
+			
+			-1.0, -1.0, -1.0,
+			-1.0, 1.0, -1.0,
+			1.0, 1.0, -1.0,
+			
+			-1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0,
+			1.0, -1.0, -1.0,
+			
+			-1.0, 1.0, -1.0,
+			-1.0, 1.0, 1.0,
+			1.0, 1.0, 1.0,
+			
+			-1.0, 1.0, -1.0,
+			1.0, 1.0, 1.0,
+			1.0, 1.0, -1.0,
+			
+			-1.0, -1.0, -1.0,
+			1.0, -1.0, -1.0,
+			1.0, -1.0, 1.0,
+			
+			-1.0, -1.0, -1.0,
+			1.0, -1.0, 1.0,
+			-1.0, -1.0, 1.0,
+			
+			1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0,
+			1.0, 1.0, 1.0,
+			
+			1.0, -1.0, -1.0,
+			1.0, 1.0, 1.0,
+			1.0, -1.0, 1.0,
+			
+			-1.0, -1.0, -1.0,
+			-1.0, -1.0, 1.0,
+			-1.0, 1.0, 1.0,
+			
+			-1.0, -1.0, -1.0,
+			-1.0, 1.0, 1.0,
+			-1.0, 1.0, -1.0
+		])
+		
+		barycentric.push.apply(barycentric, [
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0,
+			
+			1.0, 0.0, 0.0,
+			0.0, 1.0, 0.0,
+			0.0, 0.0, 1.0
+		])
+	}
+	
+	var generateElements = function(verticies, drawOrder, barycentric){		
 		verticies.push.apply(verticies, [
 			// Front face
 			-1.0, -1.0,  1.0,
@@ -43,6 +147,44 @@ var Cube = function(){
 			-1.0,  1.0, -1.0
 		])
 		
+		barycentric.push.apply(barycentric, [
+			// Front face
+			1.0,  0.0,  0.0,
+			2.0,  0.0,  0.0,
+			3.0,  0.0,  0.0,
+			4.0,  0.0,  0.0,
+			
+			// Back face
+			11.0,  0.0,  0.0,
+			12.0,  0.0,  0.0,
+			13.0,  0.0,  0.0,
+			14.0,  0.0,  0.0,
+			
+			// Top face
+			21.0,  0.0,  0.0,
+			22.0,  0.0,  0.0,
+			23.0,  0.0,  0.0,
+			24.0,  0.0,  0.0,
+			
+			// Bottom face
+			31.0,  0.0,  0.0,
+			32.0,  0.0,  0.0,
+			33.0,  0.0,  0.0,
+			34.0,  0.0,  0.0,
+			
+			// Right face
+			41.0,  0.0,  0.0,
+			42.0,  0.0,  0.0,
+			43.0,  0.0,  0.0,
+			44.0,  0.0,  0.0,
+			
+			// Left face
+			51.0,  0.0,  0.0,
+			52.0,  0.0,  0.0,
+			53.0,  0.0,  0.0,
+			54.0,  0.0,  0.0,
+		])
+		
 		drawOrder.push.apply(drawOrder, [  
 		0,  1,  2,      0,  2,  3,    // front
 		4,  5,  6,      4,  6,  7,    // back
@@ -51,23 +193,30 @@ var Cube = function(){
 		16, 17, 18,     16, 18, 19,   // right
 		20, 21, 22,     20, 22, 23    // left])
 		])
+		
 	}
 	
 	// look at book how we define a function
 	var init = function(){	
 		var verticies = []
 		var drawOrder = []	
-		generateSurface(verticies, drawOrder);
+		var barycentric = []
+		generateArray(verticies, barycentric);
 
 		mat4.identity(MVMatrix);					
 		mat4.identity(PMatrix);
 				
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer );
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.DYNAMIC_DRAW);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, barycentricBuffer );
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(barycentric), gl.DYNAMIC_DRAW);	
 
+		/*
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawOrderBuffer);
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(drawOrder), gl.STATIC_DRAW);
 		drawOrderBuffer.numItems = drawOrder.length;
+		* */
 	}
 	
 	init()
@@ -101,9 +250,18 @@ var Cube = function(){
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);			
 			gl.vertexAttribPointer(aVertex, 3, gl.FLOAT, false, 0, 0);
 			
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawOrderBuffer)			
-			gl.drawElements(gl.LINE_STRIP, drawOrderBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+			var aBarycentric = this.shaderProgram.getAttr("aBarycentric");
+			//console.log("aBarycentric"  + aBarycentric);
+			gl.enableVertexAttribArray(aBarycentric);
+			gl.bindBuffer(gl.ARRAY_BUFFER, barycentricBuffer);			
+			gl.vertexAttribPointer(aBarycentric, 3, gl.FLOAT, false, 0, 0);
 			
+			
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawOrderBuffer)			
+			gl.drawArrays(gl.TRIANGLES, 0, 36);
+			gl.flush()
+			
+			gl.disableVertexAttribArray(aBarycentric);
 			gl.disableVertexAttribArray(aVertex);
 		}
 	}

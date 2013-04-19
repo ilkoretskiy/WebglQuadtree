@@ -24,8 +24,12 @@ function onLoad()
 			break;
 		}
 	}
+	
+	// TODO move all this to some other func
+	canvas.onmouse
+	
 	initShaders();
-	initBuffers();	
+	initBuffers();
 	
 	global_angle = 0;
 	setInterval(update, 80);
@@ -42,9 +46,7 @@ function initBuffers(){
 	var flatProgram = shaderManager.getProgram('flat')
 	
 	GroundObjects.push((new Ground()).setShaderProgram(flatProgram))
-	GroundObjects.push(
-		(new Ground()).setShaderProgram(flatProgram)
-	)
+	//GroundObjects.push((new Ground()).setShaderProgram(flatProgram))
 	
 	for (var i = 0; i < 5; ++i)
 	{
@@ -74,7 +76,7 @@ function DrawGround(){
 		//mat4.translate( mat, mat, moveDist)
 		//mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)	
 		
-		if (idx == 1)
+		if (idx == 0)
 		{
 			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)				
 		}
@@ -151,10 +153,12 @@ function update()
 {
 	gl.clearColor(0, 0, 0, 1);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LESS);
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
 	
-	//global_angle = (global_angle + 1) % 360;
-	global_angle = 90
+	global_angle = (global_angle + 1) % 360;
+	//global_angle = 90
 	
 	// TOTHINK - is this is a good practice to remake convertation of matrix every time 
 	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
