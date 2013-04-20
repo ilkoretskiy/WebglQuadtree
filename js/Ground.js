@@ -9,13 +9,16 @@ var Ground = function(){
 		barycentricBuffer = gl.createBuffer(),
 		verticiesCount = 0,
 		heightMap = {},
-		width = 8,
-		height = 8
+		edgeSize = 10
+		//width = 10,
+		//height = 10
 	
 	var updateHeight = function (prevHeight){
 		var res = prevHeight;
-		var val = Math.random() / 20
-											
+		var val = Math.random() 
+				
+		res = val
+		/*							
 		if (Math.random() > 0.5)
 		{
 			res += val
@@ -24,6 +27,13 @@ var Ground = function(){
 		{
 			res -= val
 		}
+		*/
+		var maxRes = 0.1
+		var minRes = -0.1
+		if (res > maxRes)
+			res = maxRes
+		if (res < minRes)
+			res = minRes
 		return res;
 	}
 	
@@ -143,9 +153,9 @@ var Ground = function(){
 		drawOrder = []
 		barycentric = []
 		
-		heightMap = generateHeightMap(height, width)
-		
-		generateArrays(height, width, heightMap, verticies, barycentric)
+		heightMap = generateHeightMap(edgeSize, edgeSize)		
+		generateArrays(edgeSize, edgeSize, heightMap, verticies, barycentric)
+		cellSize = 1/edgeSize;
 		
 		var vertexSize = 3; // x y z
 		verticiesCount = verticies.length / vertexSize;
@@ -187,6 +197,14 @@ var Ground = function(){
 		
 		getHeight : function(row, col){
 			return heightMap[row][col];
+		},
+		
+		getCellSize : function(){
+			return cellSize;
+		},
+		
+		getCellCount : function(){
+			return edgeSize;
 		},
 		
 		draw : function(){					

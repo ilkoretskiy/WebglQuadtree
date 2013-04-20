@@ -7,7 +7,27 @@ var Objects = []
 var GroundObjects = []
 var shaderManager = {}
 var pMatrix = {}
+
 function onLoad()
+{
+	var socket = new WebSocket('ws://game.example.com:12010/updates');
+	socket.onopen = function () {
+  setInterval(function() {
+    if (socket.bufferedAmount == 0)
+      socket.send(getUpdateData());
+  }, 50);
+};
+
+	initCanvas()	
+	initShaders();
+	initBuffers();
+	
+	global_angle = 0;
+	setInterval(update, 30);
+	//update();
+}
+
+function initCanvas()
 {
 	canvas = document.getElementById("drawArea");
 	var names = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"]
@@ -25,15 +45,54 @@ function onLoad()
 		}
 	}
 	
-	// TODO move all this to some other func
-	canvas.onmouse
-	
-	initShaders();
-	initBuffers();
-	
-	global_angle = 0;
-	setInterval(update, 30);
-	//update();
+	canvas.addEventListener("click", handleMouseDown, false)
+	canvas.addEventListener("mousemove", handleMouseMove, false)
+}
+
+
+//copied from quad_tree.js
+function getCursorPosition(e){
+	if (typeof(e) == 'undefined')
+	{
+		console.log("error pos" , e)
+		return 
+	}
+	var x;
+	var y;
+	if (e.pageX || e.pageY) {
+      x = e.pageX;
+      y = e.pageY;
+    }
+    else {
+      x = e.clientX + document.body.scrollLeft +
+           document.documentElement.scrollLeft;
+      y = e.clientY + document.body.scrollTop +
+           document.documentElement.scrollTop;
+    }
+    
+    x -= canvas.offsetLeft;
+	y -= canvas.offsetTop;
+
+    return (new Point(x, y))
+}
+
+
+function Point(x, y){
+	this.x = x
+	this.y = y
+}
+
+function handleMouseDown(e)
+{
+	//console.log("mousedown", e)	
+	var mousePos = getCursorPosition(e);
+	console.log("mousedown", mousePos)	
+}
+
+function handleMouseMove(e)
+{
+	//console.log("mousemove", e)	
+	var mousePos = getCursorPosition(e);
 }
 
 function initShaders(){	
@@ -42,10 +101,17 @@ function initShaders(){
 	shaderProgram.enable()
 }
 
+var cellCount = {};
+var boxScale = {};
+
 function initBuffers(){
 	var flatProgram = shaderManager.getProgram('flat')
 	
-	GroundObjects.push((new Ground()).setShaderProgram(flatProgram))
+	var ground = (new Ground()).setShaderProgram(flatProgram)
+	GroundObjects.push(ground)
+	cellCount = ground.getCellCount()
+	boxScale = 1./cellCount;
+	
 	//GroundObjects.push((new Ground()).setShaderProgram(flatProgram))
 	
 	for (var i = 0; i < 5; ++i)
@@ -90,29 +156,29 @@ function updateCoord(val)
 {
 	var rnd = Math.random()
 	var shift = 0
-	if (rnd > 0.95)
+	if (rnd > 0.98)
 	{
 		shift = 1
 	}
-	//else if(rnd < 0.33)
-	//{
-//		shift = 0
-//	}
+	else if(rnd < 0.02)
+	{
+		shift = -1
+	}
 	val += shift
 	if (val < 0)
 	{
-		val += 8
+		val += cellCount
 	}
-	val %= 8
+	val %= cellCount
 	return val
 }
 
-// TODO get this param from groundObject
-var cellCount = 8
-var boxScale = 1./cellCount
+
 
 function MoveObjectToCell(mat, row, col)
 {	
+	
+	// i made a mistake somewhere and don't know exactly why swapped col and row
 	var groundHeight = GroundObjects[0].getHeight(col, row);
 	// "-" because z was reverse
 	var boxHeight = -groundHeight / boxScale + 1;
@@ -156,9 +222,9 @@ function DrawObjects(){
 	}	
 }
 
-var moveDist = [0, -0.5, -3]
+var moveDist = [0, -1, -3]
 
-var FixedAngle = 0
+var FixedAngle = 1
 
 function update()
 {

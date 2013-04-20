@@ -167,6 +167,7 @@ var QuadTree = function(rect_, node_capacity_){
 	};
 };
 
+/*
 var quadTree = {}
 var treeImageLayer = {}
 function onLoad()
@@ -235,3 +236,4 @@ function clickProcessing(e)
 	quadTree.insert(pos)
 	quadTree.draw(ctx)	
 }
+* */
