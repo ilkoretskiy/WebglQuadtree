@@ -7,6 +7,7 @@ var Objects = []
 var GroundObjects = []
 var shaderManager = {}
 var pMatrix = {}
+var rotationAngle = vec3.create();
 
 function onLoad()
 {
@@ -34,7 +35,7 @@ function initCanvas()
 	gl = null;
 	for (var i =0; i < names.length; ++i){
 		try {
-			gl = canvas.getContext(names[i]);			
+			gl = canvas.getContext(names[i], {antialias : true});			
 			gl.viewportWidth = canvas.width;
 			gl.viewportHeight = canvas.height;
 		} catch(e) {}
@@ -45,7 +46,8 @@ function initCanvas()
 		}
 	}
 	
-	canvas.addEventListener("click", handleMouseDown, false)
+	canvas.addEventListener("mousedown", handleMouseDown, false)
+	canvas.addEventListener("mouseup", handleMouseUp, false)
 	canvas.addEventListener("mousemove", handleMouseMove, false)
 }
 
@@ -82,17 +84,36 @@ function Point(x, y){
 	this.y = y
 }
 
+var isPressed = false;
+var lastPressedPos = {}
+var diffPos = new Point(0, 0)
+
 function handleMouseDown(e)
 {
 	//console.log("mousedown", e)	
 	var mousePos = getCursorPosition(e);
-	console.log("mousedown", mousePos)	
+	lastPressedPos = mousePos;
+	isPressed = true
+	//console.log("mousedown", mousePos)	
+	
 }
 
 function handleMouseMove(e)
 {
-	//console.log("mousemove", e)	
-	var mousePos = getCursorPosition(e);
+	if (isPressed)
+	{
+		var mousePos = getCursorPosition(e);		
+		diffPos.x = (mousePos.x - lastPressedPos.x);
+		diffPos.y = (mousePos.y - lastPressedPos.y);
+		rotationAngle[0] += diffPos.y
+		rotationAngle[1] += diffPos.x
+		lastPressedPos = mousePos;		
+	}	
+}
+
+function handleMouseUp(e)
+{
+	isPressed = false;	
 }
 
 function initShaders(){	
@@ -222,8 +243,7 @@ function DrawObjects(){
 	}	
 }
 
-var moveDist = [0, -1, -3]
-
+var moveDist = [0, -0.5, -3]
 var FixedAngle = 1
 
 function update()
@@ -251,7 +271,16 @@ function update()
 	
 	// Why reverse order
 	mat4.translate(pMatrix, pMatrix, moveDist)
+	
+	mat4.rotateX(pMatrix, pMatrix, rotationAngle[0] * Math.PI / 180)
+	mat4.rotateY(pMatrix, pMatrix, rotationAngle[1] * Math.PI / 180)
+	mat4.rotateZ(pMatrix, pMatrix, rotationAngle[2] * Math.PI / 180)
+	
+	//console.log(rotationAngle)
+	
 	mat4.rotateY(pMatrix, pMatrix,  global_angle * Math.PI / 180 )	
+	
+	
 	
 	DrawGround()
 	DrawObjects()		

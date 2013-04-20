@@ -15,10 +15,10 @@ var Ground = function(){
 	
 	var updateHeight = function (prevHeight){
 		var res = prevHeight;
-		var val = Math.random() 
+		var val = Math.random()
 				
 		res = val
-		/*							
+		/*		
 		if (Math.random() > 0.5)
 		{
 			res += val
@@ -28,8 +28,8 @@ var Ground = function(){
 			res -= val
 		}
 		*/
-		var maxRes = 0.1
-		var minRes = -0.1
+		var maxRes = 0.2
+		var minRes = -0.2
 		if (res > maxRes)
 			res = maxRes
 		if (res < minRes)
