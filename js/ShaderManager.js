@@ -15,16 +15,18 @@ var flatShader =
 	"}\n",
 
 	fs :	
-	"varying highp vec3 vPosOut;" +
+	"varying highp vec3 vPosOut;\n" +
+	"precision mediump float;	\n" + 
 	"void main() {" +		
 	"	highp float dist = dot(abs(vPosOut), abs(vPosOut));" + 
 		"if (  any(lessThan( vPosOut, vec3(0.02) )) )"		+
 		"{" +
-		"	gl_FragColor = vec4(1., 1., 1., 1.); " +
+		"	gl_FragColor = vec4(.7, .7, .7, 1); " +
+		
 		"}" +
 		"else" +
 		"{" +
-		"	gl_FragColor = vec4(0., 0, 0, .2); " +
+		"	gl_FragColor = vec4(0., 0., 0., 0.3); " +
 		"}" +
 	"}"
 }

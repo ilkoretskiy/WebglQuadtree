@@ -257,7 +257,7 @@ var Cube = function(){
 			gl.vertexAttribPointer(aBarycentric, 3, gl.FLOAT, false, 0, 0);
 			
 			
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawOrderBuffer)			
+			//gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawOrderBuffer)			
 			gl.drawArrays(gl.TRIANGLES, 0, 36);
 			gl.flush()
 			
