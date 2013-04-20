@@ -54,6 +54,8 @@ var Ground = function(){
 		
 		console.log(heightMap)
 		
+		
+		// TODO maybe apply height not as z, but as y value, after this we can do a processing without rotation
 		for (var row = 0; row < rowCount; ++row){
 			for (var col = 0; col < colCount; ++col){				
 				var nCol = col / halfCol - 1. ;
@@ -190,10 +192,14 @@ var Ground = function(){
 		draw : function(){					
 			// TODO change this function to ShaderManager object, now i don't know how to do it
 			var pUniform = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix");
-			var mvUniform = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix");
-			
 			gl.uniformMatrix4fv(pUniform, false, uPMatrix);
-			gl.uniformMatrix4fv(mvUniform, false, mvMatrix);
+			
+			var mvUniform = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix");
+			gl.uniformMatrix4fv(mvUniform, false, mvMatrix);			
+			
+			var uColor = gl.getUniformLocation(this.shaderProgram.program, "uColor");			
+			gl.uniform4fv(uColor, [0., .5, 0., 1.]);
+			
 
 			var aVertex = this.shaderProgram.getVertex()
 			gl.enableVertexAttribArray(aVertex);	
@@ -207,9 +213,9 @@ var Ground = function(){
 			gl.vertexAttribPointer(aBarycentric, 3, gl.FLOAT, false, 0, 0);
 						
 			gl.drawArrays(gl.TRIANGLES, 0, verticiesCount);
-			//gl.drawArrays(gl.LINE_STRIP, 0, verticiesCount);
-			//gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 			gl.flush();
+			
+			//gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 			//gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 			
 			gl.disableVertexAttribArray( aBarycentric)

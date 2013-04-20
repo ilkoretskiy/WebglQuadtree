@@ -239,10 +239,14 @@ var Cube = function(){
 				
 		draw : function(){
 			var uPMatrix = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix")
-			var uMVMatrix = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix")
-			
 			gl.uniformMatrix4fv(uPMatrix, false, PMatrix);
+			
+			var uMVMatrix = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix")
 			gl.uniformMatrix4fv(uMVMatrix, false, MVMatrix);
+			
+			var uColor = gl.getUniformLocation(this.shaderProgram.program, "uColor");			
+			gl.uniform4fv(uColor, [.7, .7, .7, 1]);
+
 			
 			var aVertex = this.shaderProgram.getVertex()
 			gl.enableVertexAttribArray(aVertex);

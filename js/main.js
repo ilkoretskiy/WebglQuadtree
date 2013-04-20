@@ -114,6 +114,7 @@ var boxScale = 1./cellCount
 function MoveObjectToCell(mat, row, col)
 {	
 	var groundHeight = GroundObjects[0].getHeight(col, row);
+	// "-" because z was reverse
 	var boxHeight = -groundHeight / boxScale + 1;
 	
 	// TODO get from ground

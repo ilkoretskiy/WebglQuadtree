@@ -4,29 +4,32 @@ var flatShader =
 	title : 'flat',
 	vs :
 	"attribute vec3 vPosition;\n" +
-	"attribute vec3 aBarycentric;\n" +
+	"attribute vec3 aBarycentric;\n" +	
 	"varying vec3 vPosOut;\n" +	
+	"varying vec4 vColor;\n" + 
 	"uniform mat4 uMVMatrix;\n" +
 	"uniform mat4 uPMatrix;\n" +
+	"uniform vec4 uColor;\n" + 
 	"void main() {			\n" +	
 	"	gl_PointSize = 1.;\n" +
 	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);\n" +
 	" 	vPosOut = aBarycentric;\n"+
+	" 	vColor = uColor;\n"+
 	"}\n",
 
 	fs :	
 	"varying highp vec3 vPosOut;\n" +
+	"varying highp vec4 vColor;\n" +
 	"precision mediump float;	\n" + 
 	"void main() {" +		
 	"	highp float dist = dot(abs(vPosOut), abs(vPosOut));" + 
-		"if (  any(lessThan( vPosOut, vec3(0.02) )) )"		+
+		"if (  any(lessThan( vPosOut, vec3(0.05) )) )"		+
 		"{" +
-		"	gl_FragColor = vec4(.7, .7, .7, 1); " +
-		
+		"	gl_FragColor = vColor; " +		
 		"}" +
 		"else" +
 		"{" +
-		"	gl_FragColor = vec4(0., 0., 0., 0.3); " +
+		"	gl_FragColor = vec4(vColor.rgb, 0.1) ; " +
 		"}" +
 	"}"
 }
