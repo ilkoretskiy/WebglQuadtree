@@ -118,7 +118,7 @@ function MoveObjectToCell(mat, row, col)
 	var cellCount = 8	
 	var objectLen = 2
 	// translate to 0 0
-	mat4.translate( mat, mat, [objectLen/2, 1, objectLen/2])
+	mat4.translate( mat, mat, [objectLen/2, 1.1, objectLen/2])
 	mat4.translate( mat, mat, [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
 }
 
@@ -154,6 +154,8 @@ function update()
 	gl.clearColor(0, 0, 0, 1);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.BLEND)
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)	
 	gl.depthFunc(gl.LESS);
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
 	
