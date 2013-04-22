@@ -83,22 +83,6 @@ var diffPos = new Point(0, 0)
 
 // TODO make a raytracer
 
-/* unproject - convert screen coordinate to WebGL Coordinates 
- *   winx, winy - point on the screen 
- *   winz       - winz=0 corresponds to newPoint and winzFar corresponds to farPoint 
- *   mat        - model-view-projection matrix 
- *   viewport   - array describing the canvas [x,y,width,height] 
- */ 
-function unproject(winx,winy,winz,mat,viewport){ 
-  winx = 2 * (winx - viewport[0])/viewport[2] - 1; 
-  winy = 2 * (winy - viewport[1])/viewport[3] - 1; 
-  winz = 2 * winz - 1; 
-  var invMat = mat4.create();    
-  mat4.invert(mat,invMat); 
-  var n = [winx,winy,winz,1] 
-  mat4.multiplyVec4(invMat,n,n); 
-  return [n[0]/n[3],n[1]/n[3],n[2]/n[3]] 
-} 
 
 function handleMouseDown(e)
 {
@@ -270,6 +254,26 @@ function DrawObjects(){
 	}	
 }
 
+/* unproject - convert screen coordinate to WebGL Coordinates 
+ *   winx, winy - point on the screen 
+ *   winz       - winz=0 corresponds to newPoint and winzFar corresponds to farPoint 
+ *   mat        - model-view-projection matrix 
+ *   viewport   - array describing the canvas [x,y,width,height] 
+ */ 
+function unproject(winx,winy,winz,mat,viewport){ 
+  winx = 2 * (winx - viewport[0])/viewport[2] - 1; 
+  winy = 2 * (winy - viewport[1])/viewport[3] - 1; 
+  winz = 2 * winz - 1; 
+  var invMat = mat4.create();    
+  mat4.invert(invMat, mat); 
+  //console.log("unpr" , invMat)
+  
+  var n = [winx,winy,winz,1] 
+  mat4.multiplyVec4(invMat,n,n); 
+  
+  return [n[0]/n[3],n[1]/n[3],n[2]/n[3]] 
+} 
+
 function drawGroundCross()
 {
 	var viewport = [0, 0, gl.viewportWidth, gl.viewportHeight]
@@ -281,24 +285,25 @@ function drawGroundCross()
 	var perspMat = mat4.create();
 	mat4.perspective( perspMat, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
 	
-	console.log(pMatrix)
+	//console.log(pMatrix)
 	//mat4.rotateX(mat, mat, Math.PI * 90 / 180.)
 	mat4.multiply(mat,pMatrix, perspMat)
+	//console.log(pMatrix)
 	//debugNear = [2 * mousePos.x / gl.viewportWidth - 1, 2 * mousePos.y / gl.viewportHeight - 1]
 	//mat4.multiply(PMatrix , groundObject
-	console.log(mat)
+	//console.log(mat)
 	
 	
 	var debugNear1 = unproject(lastPressedPos.x, invertedY, 0, mat, viewport)
 	var debugFar1 = unproject(lastPressedPos.x, invertedY, 1, mat, viewport)			
-	console.log("near " + debugNear1)
-	console.log("far " + debugFar1)
+	console.log("near1 \t" + debugNear1)
+	console.log("far1 \t" + debugFar1)
 	
 	
 	var debugNear2 = unproject(lastPressedPos.x, invertedY, 0, pMatrix, viewport)
 	var debugFar2 = unproject(lastPressedPos.x, invertedY, 1, pMatrix, viewport)			
-	console.log("near " + debugNear2)
-	console.log("far " + debugFar2)
+	console.log("near2 \t" + debugNear2)
+	console.log("far2 \t" + debugFar2)
 	
 	//console.log("mousedown", mousePos)	
 	
@@ -315,7 +320,7 @@ function drawGroundCross()
 	
 	// TODO do MatrixStack to linking object to ground
 
-	groundCross.draw([debugNear1, debugFar1]);
+	//groundCross.draw([debugNear1, debugFar1]);
 	groundCross.draw([debugNear2, debugFar2]);
 }
 
