@@ -1,7 +1,7 @@
 
-var flatShader =
+var wireframeShader =
 {
-	title : 'flat',
+	title : 'wireframe',
 	vs :
 	"attribute vec3 vPosition;\n" +
 	"attribute vec3 aBarycentric;\n" +	
@@ -22,18 +22,40 @@ var flatShader =
 	"varying highp vec4 vColor;\n" +
 	"precision mediump float;	\n" + 
 	"void main() {\n" +	
-		"float threshold = 0.1; \n" +
+		"float threshold = 0.08; \n" +
 		"if (any(lessThan( vPosOut, vec3(threshold))))\n"+
 		"{\n" +
 		"	float minVal = threshold - min(min(vPosOut.x, vPosOut.y), vPosOut.z); \n"+
 		"	minVal /= threshold;\n" +
-		"	gl_FragColor = mix(vec4(0.0), vColor, minVal); \n" +
+		"	gl_FragColor = vec4(vColor.rgb, minVal); \n" +
 		"}\n" +
 		
 		"else\n" +
 		"{" +
 		"	gl_FragColor =  vec4(vColor.rgb, 0.1) ; " +
 		"}" +
+	"}"
+}
+
+var flatShader =
+{
+	title : 'flat',
+	vs :
+	"attribute vec3 vPosition;\n" +
+	"varying vec4 vColor;\n" + 
+	"uniform mat4 uMVMatrix;\n" +
+	"uniform mat4 uPMatrix;\n" +
+	"uniform vec4 uColor;\n" + 
+	"void main() {			\n" +	
+	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);\n" +	
+	" 	vColor = uColor;\n"+
+	"}\n",
+
+	fs :	
+	"varying highp vec4 vColor;\n" +
+	"precision mediump float;	\n" + 
+	"void main() {\n" +	
+		"	gl_FragColor = vColor; \n" +
 	"}"
 }
 
@@ -104,13 +126,14 @@ var ShaderManager = function(){
 			programs[shader.title] = shaderProgram
 		}
 	}	
-	shaders.push(flatShader)		
+	shaders.push(wireframeShader)
+	shaders.push(flatShader)
 	compileShaders()
 			
 	return{
-		getProgram : function(title){
-			console.log(programs)
-			console.log(title)
+		getProgram : function(title){			
+			//console.log(programs)
+			//console.log(title)
 			return programs[title]
 		}
 	}
