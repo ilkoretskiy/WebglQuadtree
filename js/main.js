@@ -8,17 +8,10 @@ var GroundObjects = []
 var shaderManager = {}
 var pMatrix = {}
 var rotationAngle = vec3.create();
+var groundCross = {}
 
 function onLoad()
 {
-	var socket = new WebSocket('ws://game.example.com:12010/updates');
-	socket.onopen = function () {
-  setInterval(function() {
-    if (socket.bufferedAmount == 0)
-      socket.send(getUpdateData());
-  }, 50);
-};
-
 	initCanvas()	
 	initShaders();
 	initBuffers();
@@ -88,14 +81,32 @@ var isPressed = false;
 var lastPressedPos = {}
 var diffPos = new Point(0, 0)
 
+// TODO make a raytracer
+
+/* unproject - convert screen coordinate to WebGL Coordinates 
+ *   winx, winy - point on the screen 
+ *   winz       - winz=0 corresponds to newPoint and winzFar corresponds to farPoint 
+ *   mat        - model-view-projection matrix 
+ *   viewport   - array describing the canvas [x,y,width,height] 
+ */ 
+function unproject(winx,winy,winz,mat,viewport){ 
+  winx = 2 * (winx - viewport[0])/viewport[2] - 1; 
+  winy = 2 * (winy - viewport[1])/viewport[3] - 1; 
+  winz = 2 * winz - 1; 
+  var invMat = mat4.create();    
+  mat4.invert(mat,invMat); 
+  var n = [winx,winy,winz,1] 
+  mat4.multiplyVec4(invMat,n,n); 
+  return [n[0]/n[3],n[1]/n[3],n[2]/n[3]] 
+} 
+
 function handleMouseDown(e)
 {
 	//console.log("mousedown", e)	
 	var mousePos = getCursorPosition(e);
 	lastPressedPos = mousePos;
-	isPressed = true
-	//console.log("mousedown", mousePos)	
-	
+	isPressed = true	
+
 }
 
 function handleMouseMove(e)
@@ -108,7 +119,27 @@ function handleMouseMove(e)
 		rotationAngle[0] += diffPos.y
 		rotationAngle[1] += diffPos.x
 		lastPressedPos = mousePos;		
-	}	
+	}
+	else
+	{
+		/*
+		gl.onmousedown = function(e) {
+			var tracer = new GL.Raytracer();
+			var ray = tracer.getRayForPixel(e.x, e.y);
+			var pointOnPlane = tracer.eye.add(ray.multiply(-tracer.eye.y / ray.y));
+			var sphereHitTest = GL.Raytracer.hitTestSphere(tracer.eye, ray, center, radius);
+			if (sphereHitTest) {
+			mode = MODE_MOVE_SPHERE;
+			prevHit = sphereHitTest.hit;
+			planeNormal = tracer.getRayForPixel(gl.canvas.width / 2, gl.canvas.height / 2).negative();
+			} else if (Math.abs(pointOnPlane.x) < 1 && Math.abs(pointOnPlane.z) < 1) {
+			mode = MODE_ADD_DROPS;
+			gl.onmousemove(e);
+			} else {
+			mode = MODE_ORBIT_CAMERA;
+			}
+		};*/
+	}
 }
 
 function handleMouseUp(e)
@@ -117,27 +148,24 @@ function handleMouseUp(e)
 }
 
 function initShaders(){	
-	shaderManager = new ShaderManager()
-	var shaderProgram = shaderManager.getProgram('flat')
-	shaderProgram.enable()
+	shaderManager = new ShaderManager()	
 }
 
 var cellCount = {};
 var boxScale = {};
 
-function initBuffers(){
-	var flatProgram = shaderManager.getProgram('flat')
+function initBuffers(){	
+	groundCross =  (new Cross).setShaderProgram(shaderManager.getProgram('flat'))
 	
-	var ground = (new Ground()).setShaderProgram(flatProgram)
+	var shader = shaderManager.getProgram('wireframe')
+	var ground = (new Ground()).setShaderProgram(shader)
 	GroundObjects.push(ground)
 	cellCount = ground.getCellCount()
-	boxScale = 1./cellCount;
-	
-	//GroundObjects.push((new Ground()).setShaderProgram(flatProgram))
+	boxScale = 1./cellCount;	
 	
 	for (var i = 0; i < 5; ++i)
 	{
-		Objects.push((new Cube()).setShaderProgram(flatProgram))
+		Objects.push((new Cube()).setShaderProgram(shader))
 		Positions.push({x:0, y:0})
 	}
 	
@@ -162,7 +190,7 @@ function DrawGround(){
 		
 		if (idx == 0)
 		{
-			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)				
+			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)
 		}
 		else
 		{
@@ -197,11 +225,10 @@ function updateCoord(val)
 
 
 function MoveObjectToCell(mat, row, col)
-{	
-	
+{		
 	// i made a mistake somewhere and don't know exactly why swapped col and row
 	var groundHeight = GroundObjects[0].getHeight(col, row);
-	// "-" because z was reverse
+	// "-" because z is reversed
 	var boxHeight = -groundHeight / boxScale + 1;
 	
 	// TODO get from ground
@@ -243,12 +270,61 @@ function DrawObjects(){
 	}	
 }
 
+function drawGroundCross()
+{
+	var viewport = [0, 0, gl.viewportWidth, gl.viewportHeight]
+	var invertedY = gl.viewportHeight - lastPressedPos.y
+
+
+	var mat =  mat4.identity(mat4.create());
+
+	var perspMat = mat4.create();
+	mat4.perspective( perspMat, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
+	
+	console.log(pMatrix)
+	//mat4.rotateX(mat, mat, Math.PI * 90 / 180.)
+	mat4.multiply(mat,pMatrix, perspMat)
+	//debugNear = [2 * mousePos.x / gl.viewportWidth - 1, 2 * mousePos.y / gl.viewportHeight - 1]
+	//mat4.multiply(PMatrix , groundObject
+	console.log(mat)
+	
+	
+	var debugNear1 = unproject(lastPressedPos.x, invertedY, 0, mat, viewport)
+	var debugFar1 = unproject(lastPressedPos.x, invertedY, 1, mat, viewport)			
+	console.log("near " + debugNear1)
+	console.log("far " + debugFar1)
+	
+	
+	var debugNear2 = unproject(lastPressedPos.x, invertedY, 0, pMatrix, viewport)
+	var debugFar2 = unproject(lastPressedPos.x, invertedY, 1, pMatrix, viewport)			
+	console.log("near " + debugNear2)
+	console.log("far " + debugFar2)
+	
+	//console.log("mousedown", mousePos)	
+	
+	shaderManager.getProgram('flat').enable()
+	groundCross.setGlobalTransform(pMatrix)
+	
+	var crossMatrix = groundCross.getMotionMatrix()	
+	mat4.identity(crossMatrix);	
+	
+	//mat4.translate(crossMatrix, crossMatrix, [-debugNear[1], 0.1, debugNear[0]]);
+	//mat4.rotateX(crossMatrix, crossMatrix, Math.PI / 2);
+	//console.log([debugNear[1], debugNear[0], 0])
+	//console.log(crossMatrix)
+	
+	// TODO do MatrixStack to linking object to ground
+
+	groundCross.draw([debugNear1, debugFar1]);
+	groundCross.draw([debugNear2, debugFar2]);
+}
+
 var moveDist = [0, -0.5, -3]
 var FixedAngle = 1
 
 function update()
 {
-	gl.clearColor(0, 0, 0, 1);
+	gl.clearColor(0, .1, 0, .8);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.enable(gl.DEPTH_TEST);
 	gl.enable(gl.BLEND)
@@ -280,8 +356,15 @@ function update()
 	
 	mat4.rotateY(pMatrix, pMatrix,  global_angle * Math.PI / 180 )	
 	
+	// ToTHink - render pipeline
 	
-	
+	// TODO reduce count of program changing
+	shaderManager.getProgram('wireframe').enable()
 	DrawGround()
 	DrawObjects()		
+	
+	if (isPressed)
+	{
+		drawGroundCross()
+	}
 }

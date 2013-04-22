@@ -13,11 +13,19 @@ var Ground = function(){
 		//width = 10,
 		//height = 10
 	
-	var updateHeight = function (prevHeight){
+	var updateHeight = function (prevHeight, maxRes, minRes){
 		var res = prevHeight;
 		var val = Math.random()
+		
+		if (maxRes === undefined)
+			maxRes = 0.2
+			
+		if (minRes === undefined)
+			minRes = -0.2
+		//var maxRes = 0.2
+		//var minRes = -0.2
 				
-		res = val
+		res = val - Math.abs(minRes)
 		/*		
 		if (Math.random() > 0.5)
 		{
@@ -28,8 +36,6 @@ var Ground = function(){
 			res -= val
 		}
 		*/
-		var maxRes = 0.2
-		var minRes = -0.2
 		if (res > maxRes)
 			res = maxRes
 		if (res < minRes)
@@ -47,7 +53,7 @@ var Ground = function(){
 			map[row] = new Array(width);
 			for (var col = 0; col < width; ++col)
 			{
-				z = updateHeight(z)
+				z = updateHeight(z, 0, 0)
 				map[row][col] = z;
 			}
 		}
@@ -72,7 +78,7 @@ var Ground = function(){
 				var nRow = row / halfRow - 1. ;
 				
 				z = heightMap[row][col];
-				var midZ = updateHeight(z);
+				var midZ = updateHeight(z, 0, 0);
 				
 				var midPoint = [nCol + dx / 2., nRow + dy / 2., midZ];
 								
