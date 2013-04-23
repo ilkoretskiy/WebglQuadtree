@@ -9,6 +9,7 @@ var shaderManager = {}
 var pMatrix = {}
 var rotationAngle = vec3.create();
 var groundCross = {}
+var cameraMatrix = {}
 
 function onLoad()
 {
@@ -80,6 +81,8 @@ function Point(x, y){
 var isPressed = false;
 var lastPressedPos = {}
 var diffPos = new Point(0, 0)
+var posOnMouseDown = {}
+var posOnMouseUp  = {}
 
 // TODO make a raytracer
 
@@ -90,7 +93,7 @@ function handleMouseDown(e)
 	var mousePos = getCursorPosition(e);
 	lastPressedPos = mousePos;
 	isPressed = true	
-
+	posOnMouseDown  = new Point(mousePos.x, mousePos.y)
 }
 
 function handleMouseMove(e)
@@ -102,7 +105,7 @@ function handleMouseMove(e)
 		diffPos.y = (mousePos.y - lastPressedPos.y);
 		rotationAngle[0] += diffPos.y
 		rotationAngle[1] += diffPos.x
-		lastPressedPos = mousePos;		
+		lastPressedPos = mousePos;
 	}
 	else
 	{
@@ -128,6 +131,8 @@ function handleMouseMove(e)
 
 function handleMouseUp(e)
 {
+	var mousePos = getCursorPosition(e);
+	posOnMouseDown  = new Point(mousePos.x, mousePos.y)
 	isPressed = false;	
 }
 
@@ -139,32 +144,36 @@ var cellCount = {};
 var boxScale = {};
 
 function initBuffers(){	
-	groundCross =  (new Cross).setShaderProgram(shaderManager.getProgram('flat'))
+	groundCross =  (new Cross).setShader(shaderManager.getProgram('flat'))
 	
 	var shader = shaderManager.getProgram('wireframe')
-	var ground = (new Ground()).setShaderProgram(shader)
+	var ground = (new Ground()).setShader(shader)
 	GroundObjects.push(ground)
 	cellCount = ground.getCellCount()
 	boxScale = 1./cellCount;	
 	
 	for (var i = 0; i < 5; ++i)
 	{
-		Objects.push((new Cube()).setShaderProgram(shader))
+		Objects.push((new Cube()).setShader(shader))
 		Positions.push({x:0, y:0})
 	}
 	
 		
 	pMatrix = mat4.create();
 	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
+	cameraMatrix = mat4.create()
+	mat4.identity(cameraMatrix);
 }
 
 //StackMatrix.push
 //StackMatrix.pop 
 
 function DrawGround(){
+	var VPMatrix = mat4.create()	
+	mat4.multiply(VPMatrix, pMatrix, cameraMatrix) 
 	for (var idx = 0; idx < GroundObjects.length; ++idx){
-		var curObject = GroundObjects[idx]
-		curObject.setGlobalTransform(pMatrix)		
+		var curObject = GroundObjects[idx]		
+		curObject.setGlobalTransform(VPMatrix)		
 		var mat = curObject.getMotionMatrix();		
 				
 		// TODO replace to matrix stack		
@@ -227,9 +236,11 @@ function MoveObjectToCell(mat, row, col)
 var x = 0
 var y = 0
 function DrawObjects(){	
+	var VPMatrix = mat4.create()	
+	mat4.multiply(VPMatrix, pMatrix, cameraMatrix) 
 	for (var idx = 0; idx < Objects.length; ++idx){		
 		var curObject = Objects[idx]
-		curObject.setGlobalTransform(pMatrix)
+		curObject.setGlobalTransform(VPMatrix)
 		var mat = curObject.getMotionMatrix();
 		
 		// TODO replace to matrix stack		
@@ -246,8 +257,6 @@ function DrawObjects(){
 		//position.y = 0
 		position.x = updateCoord(position.x)
 		position.y = updateCoord(position.y)		
-		
-		
 		
 		MoveObjectToCell(mat, position.y, position.x)				
 		curObject.draw()		
@@ -277,55 +286,37 @@ function unproject(winx,winy,winz,mat,viewport){
 function drawGroundCross()
 {
 	var viewport = [0, 0, gl.viewportWidth, gl.viewportHeight]
-	var invertedY = gl.viewportHeight - lastPressedPos.y
+	var invertedY = gl.viewportHeight - posOnMouseDown.y
 
 
-	var mat =  mat4.identity(mat4.create());
-
-	var perspMat = mat4.create();
-	mat4.perspective( perspMat, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
+	var MVPMatrix =  mat4.create();
 	
-	//console.log(pMatrix)
-	//mat4.rotateX(mat, mat, Math.PI * 90 / 180.)
-	mat4.multiply(mat,pMatrix, perspMat)
-	//console.log(pMatrix)
-	//debugNear = [2 * mousePos.x / gl.viewportWidth - 1, 2 * mousePos.y / gl.viewportHeight - 1]
-	//mat4.multiply(PMatrix , groundObject
-	//console.log(mat)
+	mat4.multiply(MVPMatrix, pMatrix, cameraMatrix)
 	
 	
-	var debugNear1 = unproject(lastPressedPos.x, invertedY, 0, mat, viewport)
-	var debugFar1 = unproject(lastPressedPos.x, invertedY, 1, mat, viewport)			
-	console.log("near1 \t" + debugNear1)
-	console.log("far1 \t" + debugFar1)
+	var debugNear1 = unproject(posOnMouseDown.x, invertedY, 0, MVPMatrix, viewport)
+	var debugFar1 = unproject(posOnMouseDown.x, invertedY, 1, MVPMatrix, viewport)	
 	
+	console.log(debugNear1 + '\t' + debugFar1) 		
 	
-	var debugNear2 = unproject(lastPressedPos.x, invertedY, 0, pMatrix, viewport)
-	var debugFar2 = unproject(lastPressedPos.x, invertedY, 1, pMatrix, viewport)			
-	console.log("near2 \t" + debugNear2)
-	console.log("far2 \t" + debugFar2)
-	
-	//console.log("mousedown", mousePos)	
-	
-	shaderManager.getProgram('flat').enable()
-	groundCross.setGlobalTransform(pMatrix)
+	groundCross.getShader().enable()
+	groundCross.setGlobalTransform(mat4.identity(mat4.create()))
 	
 	var crossMatrix = groundCross.getMotionMatrix()	
-	mat4.identity(crossMatrix);	
-	
-	//mat4.translate(crossMatrix, crossMatrix, [-debugNear[1], 0.1, debugNear[0]]);
-	//mat4.rotateX(crossMatrix, crossMatrix, Math.PI / 2);
-	//console.log([debugNear[1], debugNear[0], 0])
-	//console.log(crossMatrix)
-	
-	// TODO do MatrixStack to linking object to ground
+	mat4.identity(crossMatrix);		
 
-	//groundCross.draw([debugNear1, debugFar1]);
-	groundCross.draw([debugNear2, debugFar2]);
+	// TODO do MatrixStack to linking object to ground or move this to Scene object
+
+	groundCross.draw([debugNear1, debugFar1]);
+
 }
 
 var moveDist = [0, -0.5, -3]
 var FixedAngle = 1
+
+function toRad(grad){
+	return grad * Math.PI / 180
+}
 
 function update()
 {
@@ -348,18 +339,27 @@ function update()
 	}
 	
 	// TOTHINK - is this is a good practice to remake convertation of matrix every time 
-	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
 	
+	mat4.identity(cameraMatrix);
 	// Why reverse order
-	mat4.translate(pMatrix, pMatrix, moveDist)
+
+	mat4.translate(cameraMatrix, cameraMatrix, moveDist)	
+	mat4.rotateX(cameraMatrix, cameraMatrix, toRad(rotationAngle[0]))
+	mat4.rotateY(cameraMatrix, cameraMatrix, toRad(rotationAngle[1]))
+	mat4.rotateZ(cameraMatrix, cameraMatrix, toRad(rotationAngle[2]))
+
 	
-	mat4.rotateX(pMatrix, pMatrix, rotationAngle[0] * Math.PI / 180)
-	mat4.rotateY(pMatrix, pMatrix, rotationAngle[1] * Math.PI / 180)
-	mat4.rotateZ(pMatrix, pMatrix, rotationAngle[2] * Math.PI / 180)
-	
+	/*
+	mat4.rotateX(cameraMatrix, cameraMatrix, rotationAngle[0] * Math.PI / 180)
+	mat4.rotateY(cameraMatrix, cameraMatrix, rotationAngle[1] * Math.PI / 180)
+	mat4.rotateZ(cameraMatrix, cameraMatrix, rotationAngle[2] * Math.PI / 180)
+	moveDist[0] 
+	mat4.lookAt(cameraMatrix, moveDist, [0, 0, 0], [0, 0, -1]);// = function (out, eye, center, up) {
+	*/
+		
 	//console.log(rotationAngle)
 	
-	mat4.rotateY(pMatrix, pMatrix,  global_angle * Math.PI / 180 )	
+	//mat4.rotateY(cameraMatrix, cameraMatrix, global_angle * Math.PI / 180 )	
 	
 	// ToTHink - render pipeline
 	
@@ -373,3 +373,5 @@ function update()
 		drawGroundCross()
 	}
 }
+
+// TODO make a Scene object. It must control all positions of added objects 

@@ -187,9 +187,13 @@ var Ground = function(){
 	
 	// why i can't do this with this.var = function ?
 	return{			
-		setShaderProgram : function(program){
+		setShader : function(program){
 			this.shaderProgram = program			
 			return this
+		},
+		
+		getShader : function(){
+			return this.shaderProgram
 		},
 		
 		setGlobalTransform : function(matrix){

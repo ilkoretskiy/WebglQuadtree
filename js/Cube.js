@@ -222,10 +222,13 @@ var Cube = function(){
 	init()
 	
 	return {
-		setShaderProgram : function(program){
-			this.shaderProgram = program	
-			//console.log(this)	
-			return this	
+		setShader : function(program){
+			this.shaderProgram = program			
+			return this
+		},
+		
+		getShader : function(){
+			return this.shaderProgram
 		},
 		
 		setGlobalTransform : function(matrix){
