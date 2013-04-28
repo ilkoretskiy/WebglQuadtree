@@ -7,12 +7,11 @@ var wireframeShader =
 	"attribute vec3 aBarycentric;\n" +	
 	"varying vec3 vPosOut;\n" +	
 	"varying vec4 vColor;\n" + 
-	"uniform mat4 uMVMatrix;\n" +
-	"uniform mat4 uPMatrix;\n" +
+	"uniform mat4 uMVPMatrix;\n" +
 	"uniform vec4 uColor;\n" + 
 	"void main() {			\n" +	
-	"	gl_PointSize = 1.;\n" +
-	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);\n" +
+	"	gl_PointSize = 5.;\n" +
+	"	gl_Position =  uMVPMatrix *  vec4(vPosition, 1.0);\n" +
 	" 	vPosOut = aBarycentric;\n"+
 	" 	vColor = uColor;\n"+
 	"}\n",
@@ -28,11 +27,11 @@ var wireframeShader =
 		"	float minVal = threshold - min(min(vPosOut.x, vPosOut.y), vPosOut.z); \n"+
 		"	minVal /= threshold;\n" +
 		"	gl_FragColor = vec4(vColor.rgb, minVal); \n" +
-		"}\n" +
-		
+		"}\n" +		
 		"else\n" +
 		"{" +
-		"	gl_FragColor =  vec4(vColor.rgb, 0.1) ; " +
+		//"	gl_FragColor =  vec4(vColor.rgb, 1.) ; " +
+		"	gl_FragColor =  vec4(vColor.rgb, 0.2) ; " +
 		"}" +
 	"}"
 }
@@ -43,12 +42,21 @@ var flatShader =
 	vs :
 	"attribute vec3 vPosition;\n" +
 	"varying vec4 vColor;\n" + 
-	"uniform mat4 uMVMatrix;\n" +
-	"uniform mat4 uPMatrix;\n" +
+	"uniform mat4 uMVPMatrix;\n" +
 	"uniform vec4 uColor;\n" + 
-	"void main() {			\n" +	
-	"	gl_Position =  uPMatrix * uMVMatrix *  vec4(vPosition, 1.0);\n" +	
-	" 	vColor = uColor;\n"+
+	"void main() {			\n" +		
+	"	gl_Position =  uMVPMatrix *  vec4(vPosition, 1.0);\n" +	
+	"   if (vPosition.z < 0.)\n"	+
+		"{\n" +
+		"	gl_PointSize = 10.;\n" +
+		"	vColor = vec4 (1., 0., 0., 1.); \n"+
+		"}\n" +
+		"else\n" +
+		"{\n" +
+		"	gl_PointSize = 1.;\n" +
+		"	vColor = vec4 (0., 1., 1., 1); \n"+
+		"}\n" +	
+	//" 	vColor = uColor;\n"+
 	"}\n",
 
 	fs :	
@@ -132,8 +140,6 @@ var ShaderManager = function(){
 			
 	return{
 		getProgram : function(title){			
-			//console.log(programs)
-			//console.log(title)
 			return programs[title]
 		}
 	}

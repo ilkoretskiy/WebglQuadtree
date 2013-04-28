@@ -1,8 +1,7 @@
 var Cube = function(){
 	var vertexBuffer = gl.createBuffer();
 	var drawOrderBuffer = gl.createBuffer();
-	var PMatrix = mat4.create();
-	var	MVMatrix = mat4.create();
+	var	MVPMatrix = mat4.create();
 	var barycentricBuffer = gl.createBuffer()
 		
 	
@@ -203,8 +202,7 @@ var Cube = function(){
 		var barycentric = []
 		generateArray(verticies, barycentric);
 
-		mat4.identity(MVMatrix);					
-		mat4.identity(PMatrix);
+		mat4.identity(MVPMatrix);
 				
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer );
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.DYNAMIC_DRAW);
@@ -212,11 +210,6 @@ var Cube = function(){
 		gl.bindBuffer(gl.ARRAY_BUFFER, barycentricBuffer );
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(barycentric), gl.DYNAMIC_DRAW);	
 
-		/*
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawOrderBuffer);
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(drawOrder), gl.STATIC_DRAW);
-		drawOrderBuffer.numItems = drawOrder.length;
-		* */
 	}
 	
 	init()
@@ -237,15 +230,12 @@ var Cube = function(){
 		},
 		
 		getMotionMatrix : function(){
-			return MVMatrix
+			return MVPMatrix
 		},
 				
-		draw : function(){
-			var uPMatrix = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix")
-			gl.uniformMatrix4fv(uPMatrix, false, PMatrix);
-			
-			var uMVMatrix = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix")
-			gl.uniformMatrix4fv(uMVMatrix, false, MVMatrix);
+		draw : function(){			
+			var uMVPMatrix = gl.getUniformLocation(this.shaderProgram.program, "uMVPMatrix")
+			gl.uniformMatrix4fv(uMVPMatrix, false, MVPMatrix);
 			
 			var uColor = gl.getUniformLocation(this.shaderProgram.program, "uColor");			
 			gl.uniform4fv(uColor, [.7, .7, .7, 1]);
