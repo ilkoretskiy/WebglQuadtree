@@ -9,6 +9,7 @@ var shaderManager = {}
 var pMatrix = {}
 var rotationAngle = vec3.create();
 var groundCross = {}
+var groundCube = {}
 var cameraMatrix = {}
 
 function onLoad()
@@ -182,6 +183,7 @@ function initBuffers(){
 	
 	GroundObjects.push((new Ground()).setShader(shader))
 	
+	groundCube = (new Cube()).setShader(shader)
 	for (var i = 0; i < 5; ++i)
 	{
 		Objects.push((new Cube()).setShader(shader))
@@ -199,6 +201,7 @@ function initBuffers(){
 //StackMatrix.pop 
 
 function DrawGround(){
+	GroundObjects[0].getShader().enable()
 	var VPMatrix = mat4.create()	
 	mat4.multiply(VPMatrix, pMatrix, cameraMatrix) 
 	for (var idx = 0; idx < GroundObjects.length; ++idx){
@@ -269,6 +272,7 @@ function MoveObjectToCell(mat, row, col)
 var x = 0
 var y = 0
 function DrawObjects(){	
+	Objects[0].getShader().enable()
 	var VPMatrix = mat4.create()	
 	mat4.multiply(VPMatrix, pMatrix, cameraMatrix) 
 	for (var idx = 0; idx < Objects.length; ++idx){		
@@ -333,7 +337,7 @@ function getGroundZeroPos(MVPMatrix)
 	return [(near[0] + diff_vec[0] * t), (near[1] + diff_vec[1] * t)]
 }
 
-function drawGroundCross()
+function DrawGroundPosObjects()
 {		
 	if (isPressed)
 	{
@@ -341,32 +345,59 @@ function drawGroundCross()
 	}
 	
 	var MVPMatrix =  mat4.create();		
+	//console.log("MVPMatrix", MVPMatrix)
 	mat4.multiply(MVPMatrix, pMatrix, cameraMatrix)	
-	// Apply horizontal model
+	// Apply horizontal ground model
 	mat4.rotateX(MVPMatrix, MVPMatrix, Math.PI * 90 / 180.)
 
-	
 	var zeroPos = getGroundZeroPos(MVPMatrix)
 	
-	var scaleKoef = 0.1
+	DrawGroundCross(MVPMatrix, zeroPos)
+	DrawGroundCube(MVPMatrix, zeroPos)
+	//groundCube
+
 	
-	var crossMatrix = groundCross.getMotionMatrix()	
+}
+
+function DrawGroundCube(MVPMatrix, zeroPos)
+{
+	groundCube.getShader().enable()
+	var scaleKoef = 0.1	
+	var crossMatrix = groundCube.getMotionMatrix()	
 	mat4.identity(crossMatrix);		
-	mat4.multiply(crossMatrix, MVPMatrix, crossMatrix);	
-	mat4.scale(crossMatrix, crossMatrix, [scaleKoef, scaleKoef, scaleKoef]);	
-	
+	mat4.multiply(crossMatrix, MVPMatrix, crossMatrix);		
+	mat4.scale(crossMatrix, crossMatrix, [scaleKoef, scaleKoef, scaleKoef]);			
 	
 	var invScale = 1./scaleKoef	
+	
 	var shift = [ invScale * zeroPos[0], 
 				  invScale * zeroPos[1],
 				  0
 				]
 
 	mat4.translate(crossMatrix, crossMatrix, shift);
-
 	
+	groundCube.draw();
+}
+
+function DrawGroundCross(MVPMatrix, zeroPos)
+{
+	var scaleKoef = 0.1	
+	var crossMatrix = groundCross.getMotionMatrix()	
+	mat4.identity(crossMatrix);		
+	mat4.multiply(crossMatrix, MVPMatrix, crossMatrix);		
+	mat4.scale(crossMatrix, crossMatrix, [scaleKoef, scaleKoef, scaleKoef]);			
+	
+	var invScale = 1./scaleKoef	
+	
+	var shift = [ invScale * zeroPos[0], 
+				  invScale * zeroPos[1],
+				  0
+				]
+
+	mat4.translate(crossMatrix, crossMatrix, shift);
 	groundCross.getShader().enable()
-	groundCross.draw();		
+	groundCross.draw();
 }
 
 var moveDist = [0, -0.5, -3]
@@ -423,14 +454,11 @@ function update()
 	// ToTHink - render pipeline
 	
 	// TODO reduce count of program changing
-	shaderManager.getProgram('wireframe').enable()
+	
 	DrawObjects()
 	
-	
-	
-	drawGroundCross()
-	
-	shaderManager.getProgram('wireframe').enable()
+	DrawGroundPosObjects()
+		
 	DrawGround()	
 	
 }

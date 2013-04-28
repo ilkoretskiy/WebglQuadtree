@@ -14,17 +14,17 @@ var Ground = function(){
 	
 	var updateHeight = function (prevHeight, maxRes, minRes){
 		var res = prevHeight;
-		var val = Math.random()
+		var val = Math.random() - 0.5
 		
 		if (maxRes === undefined)
-			maxRes = 0.2
+			maxRes = 0.1
 			
 		if (minRes === undefined)
-			minRes = -0.2
+			minRes = -0.1
 		//var maxRes = 0.2
 		//var minRes = -0.2
 				
-		res = val - Math.abs(minRes)
+		res = val
 		/*		
 		if (Math.random() > 0.5)
 		{
