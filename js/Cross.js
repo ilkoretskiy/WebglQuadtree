@@ -6,6 +6,7 @@ var Cross = function(){
 		mvMatrix = mat4.create(),
 		vertexIndexBuffer = gl.createBuffer(),
 		vPosBuffer = gl.createBuffer(),
+		aColorBuffer = gl.createBuffer(),
 		barycentricBuffer = gl.createBuffer(),
 		verticiesCount = 0,
 		heightMap = {},
@@ -37,8 +38,14 @@ var Cross = function(){
 		gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.DYNAMIC_DRAW);
 		
-		gl.bindBuffer(gl.ARRAY_BUFFER, barycentricBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(barycentric), gl.DYNAMIC_DRAW);		
+		/*
+		var colors = [
+			0, 0, 0, 1, 
+			1, 1, 1, 1
+		]
+		gl.bindBuffer(gl.ARRAY_BUFFER, aColorBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);			
+		* */
 	}
 	
 	_init()
@@ -54,10 +61,6 @@ var Cross = function(){
 			return this.shaderProgram
 		},
 		
-		setGlobalTransform : function(matrix){
-			uPMatrix = matrix			
-			return this
-		},
 		
 		getMotionMatrix : function(){
 			return mvMatrix
@@ -68,33 +71,41 @@ var Cross = function(){
 			// uniforms
 			{
 				// TODO change this function to ShaderManager object, now i don't know how to do it
-				var pUniform = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix");
-				gl.uniformMatrix4fv(pUniform, false, uPMatrix);
+				//var pUniform = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix");
+				//gl.uniformMatrix4fv(pUniform, false, uPMatrix);
 				
-				var mvUniform = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix");
+				var mvUniform = gl.getUniformLocation(this.shaderProgram.program, "uMVPMatrix");
 				gl.uniformMatrix4fv(mvUniform, false, mvMatrix);			
 				
 				var uColor = gl.getUniformLocation(this.shaderProgram.program, "uColor");			
 				gl.uniform4fv(uColor, [1., 1, 1., 1.]);
 			}
+			var POINTS_PER_VERTEX = 3
+					
+			//gl.enableVertexAttribArray(aColor)
+			//gl.bindBuffer(gl.ARRAY_BUFFER, aColorBuffer);
+			//gl.vertexAttribPointer(aColor, 4, gl.FLOAT, false, 0, 0)
 			
 			var aVertex = this.shaderProgram.getVertex()
 			gl.enableVertexAttribArray(aVertex);	
-			
-			gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuffer);			
-			
-			
+			gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuffer);	
+												
+					
 			// TODO REMOVE THIS only for debug
-			verticies = []
-			verticies.push.apply(verticies, [points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2]])
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.DYNAMIC_DRAW);
+			//verticies = []
+			//verticies.push.apply(verticies, [points[0][0], points[0][1], points[0][2], points[1][0], points[1][1], points[1][2]])
+			//gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.DYNAMIC_DRAW);
 			
-			
+					
 			gl.vertexAttribPointer(aVertex, 3, gl.FLOAT, false, 0, 0);			
-			gl.drawArrays(gl.LINES, 0, 2);
+			
+			gl.drawArrays(gl.LINES, 0, verticies.length / POINTS_PER_VERTEX);
+			
 			gl.flush();
-						
+			gl.drawArrays(gl.POINTS, 0, verticies.length / POINTS_PER_VERTEX);
+			gl.flush();
 			gl.disableVertexAttribArray( aVertex)
+			//gl.disableVertexAttribArray( aColor)
 		}
 	}
 }

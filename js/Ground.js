@@ -2,8 +2,7 @@ var Ground = function(){
 	var verticies = [],
 		drawOrder = [],
 		barycentric = [],
-		uPMatrix = mat4.create(),
-		mvMatrix = mat4.create(),
+		MVPMatrix = mat4.create(),
 		vertexIndexBuffer = gl.createBuffer(),
 		vPosBuffer = gl.createBuffer(),
 		barycentricBuffer = gl.createBuffer(),
@@ -53,7 +52,7 @@ var Ground = function(){
 			map[row] = new Array(width);
 			for (var col = 0; col < width; ++col)
 			{
-				z = updateHeight(z, 0, 0)
+				z = updateHeight(z)
 				map[row][col] = z;
 			}
 		}
@@ -78,7 +77,7 @@ var Ground = function(){
 				var nRow = row / halfRow - 1. ;
 				
 				z = heightMap[row][col];
-				var midZ = updateHeight(z, 0, 0);
+				var midZ = updateHeight(z);
 				
 				var midPoint = [nCol + dx / 2., nRow + dy / 2., midZ];
 								
@@ -168,8 +167,7 @@ var Ground = function(){
 		
 		//generateElements(7, 7, verticies, drawOrder, barycentric)
 					
-		mat4.identity(mvMatrix);
-		mat4.identity(uPMatrix);
+		mat4.identity(MVPMatrix);
 		
 					
 		gl.bindBuffer(gl.ARRAY_BUFFER, vPosBuffer);
@@ -196,13 +194,8 @@ var Ground = function(){
 			return this.shaderProgram
 		},
 		
-		setGlobalTransform : function(matrix){
-			uPMatrix = matrix			
-			return this
-		},
-		
 		getMotionMatrix : function(){
-			return mvMatrix
+			return MVPMatrix
 		},
 		
 		getHeight : function(row, col){
@@ -218,12 +211,9 @@ var Ground = function(){
 		},
 		
 		draw : function(){					
-			// TODO change this function to ShaderManager object, now i don't know how to do it
-			var pUniform = gl.getUniformLocation(this.shaderProgram.program, "uPMatrix");
-			gl.uniformMatrix4fv(pUniform, false, uPMatrix);
-			
-			var mvUniform = gl.getUniformLocation(this.shaderProgram.program, "uMVMatrix");
-			gl.uniformMatrix4fv(mvUniform, false, mvMatrix);			
+			// TODO change this function to ShaderManager object, now i don't know how to do it			
+			var uMVMatrix = gl.getUniformLocation(this.shaderProgram.program, "uMVPMatrix");
+			gl.uniformMatrix4fv(uMVMatrix, false, MVPMatrix);			
 			
 			var uColor = gl.getUniformLocation(this.shaderProgram.program, "uColor");			
 			gl.uniform4fv(uColor, [0., .5, 0., 1.]);
