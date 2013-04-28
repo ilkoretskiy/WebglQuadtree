@@ -8,7 +8,7 @@ var Ground = function(){
 		barycentricBuffer = gl.createBuffer(),
 		verticiesCount = 0,
 		heightMap = {},
-		edgeSize = 10
+		edgeSize = 100
 		//width = 10,
 		//height = 10
 	

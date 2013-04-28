@@ -29,8 +29,6 @@ function addUiControl()
 {
 	var container = document.getElementById("ui-controls")
 	
-	
-	
 	var newEl = document.createElement("button")
 	newEl.class  = "btn"
 	newEl.type = "button"
@@ -71,8 +69,9 @@ function initCanvas()
 	canvas.addEventListener("mousedown", handleMouseDown, false)
 	canvas.addEventListener("mouseup", handleMouseUp, false)
 	canvas.addEventListener("mousemove", handleMouseMove, false)
+	this.canvas.addEventListener('mousewheel', handleMouseWheel, false);
+	
 }
-
 
 //copied from quad_tree.js
 function getCursorPosition(e){
@@ -137,26 +136,20 @@ function handleMouseMove(e)
 	}
 	else
 	{
-		/*
-		gl.onmousedown = function(e) {
-			var tracer = new GL.Raytracer();
-			var ray = tracer.getRayForPixel(e.x, e.y);
-			var pointOnPlane = tracer.eye.add(ray.multiply(-tracer.eye.y / ray.y));
-			var sphereHitTest = GL.Raytracer.hitTestSphere(tracer.eye, ray, center, radius);
-			if (sphereHitTest) {
-			mode = MODE_MOVE_SPHERE;
-			prevHit = sphereHitTest.hit;
-			planeNormal = tracer.getRayForPixel(gl.canvas.width / 2, gl.canvas.height / 2).negative();
-			} else if (Math.abs(pointOnPlane.x) < 1 && Math.abs(pointOnPlane.z) < 1) {
-			mode = MODE_ADD_DROPS;
-			gl.onmousemove(e);
-			mode = MODE_ORBIT_CAMERA;
-			} else {
-			mode = MODE_ORBIT_CAMERA;
-			}
-		};*/
 	}
 }
+
+var zoom = 0
+
+function handleMouseWheel(e)
+{
+	if (e.wheelDelta > 0)
+		zoom += 1
+	else
+		zoom -= 1
+	//console.log("wheel event", e)
+}
+
 
 function handleMouseUp(e)
 {
@@ -182,10 +175,10 @@ function initBuffers(){
 	cellCount = ground.getCellCount()
 	boxScale = 1./cellCount;	
 	
-	GroundObjects.push((new Ground()).setShader(shader))
+	//GroundObjects.push((new Ground()).setShader(shader))
 	
 	groundCube = (new Cube()).setShader(shader)
-	for (var i = 0; i < 5; ++i)
+	for (var i = 0; i < 50; ++i)
 	{
 		Objects.push((new Cube()).setShader(shader))
 		Positions.push({x:0, y:0})
@@ -235,7 +228,7 @@ function updateCoord(val)
 {
 	var rnd = Math.random()
 	var shift = 0
-	if (rnd > 0.98)
+	if (rnd > 0.90)
 	{
 		shift = 1
 	}
@@ -437,6 +430,8 @@ function update()
 		global_angle = (global_angle + 1) % 360;
 	}
 	
+	moveDist[2] = zoom / 10;	
+	
 	// TOTHINK - is this is a good practice to remake convertation of matrix every time 
 	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
 	
@@ -447,14 +442,7 @@ function update()
 	mat4.rotateY(cameraMatrix, cameraMatrix, toRad(rotationAngle[1]))
 	mat4.rotateZ(cameraMatrix, cameraMatrix, toRad(rotationAngle[2]))
 
-	
-	/*
-	mat4.rotateX(cameraMatrix, cameraMatrix, rotationAngle[0] * Math.PI / 180)
-	mat4.rotateY(cameraMatrix, cameraMatrix, rotationAngle[1] * Math.PI / 180)
-	mat4.rotateZ(cameraMatrix, cameraMatrix, rotationAngle[2] * Math.PI / 180)
-	moveDist[0] 
-	mat4.lookAt(cameraMatrix, moveDist, [0, 0, 0], [0, 0, -1]);// = function (out, eye, center, up) {
-	*/
+
 		
 	//console.log(rotationAngle)
 	
