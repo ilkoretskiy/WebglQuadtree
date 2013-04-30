@@ -22,17 +22,13 @@ var wireframeShader =
 	"precision mediump float;	\n" + 
 	"void main() {\n" +	
 		"float threshold = 0.08; \n" +
-		"if (any(lessThan( vPosOut, vec3(threshold))))\n"+
+		"if (!(any(lessThan( vPosOut, vec3(threshold)))))\n"+
 		"{\n" +
+		"	discard;\n"+		
+		"}\n" +		
 		"	float minVal = threshold - min(min(vPosOut.x, vPosOut.y), vPosOut.z); \n"+
 		"	minVal /= threshold;\n" +
 		"	gl_FragColor = vec4(vColor.rgb, minVal); \n" +
-		"}\n" +		
-		"else\n" +
-		"{" +
-		//"	gl_FragColor =  vec4(vColor.rgb, 1.) ; " +
-		"	gl_FragColor =  vec4(vColor.rgb, 0.2) ; " +
-		"}" +
 	"}"
 }
 
@@ -145,7 +141,6 @@ var ShaderManager = function(){
 	}
 }
 
-
 // unused
 function getShaderSource(shaderNode){
 	var shaderSource = "";
@@ -157,8 +152,3 @@ function getShaderSource(shaderNode){
 	}
 	return shaderSource
 }
-
-/*
- * 	pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-	mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-*/

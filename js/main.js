@@ -1,16 +1,22 @@
-var vertexPositionAttribute  = {}
+g = {}
+g.camera = {}
+g.mouseHandler = {}
+g.objects = {}
+g.objects.ground = {}
+g.objects.cubes = []
+
 var canvas = {}
 var ground = {}
-
 var Positions = []
-var Objects = []
+
 var GroundObjects = []
 var shaderManager = {}
-var pMatrix = {}
-var rotationAngle = vec3.create();
+
 var groundCross = {}
 var groundCube = {}
-var cameraMatrix = {}
+
+
+var fullscreen_mode = 1
 
 function onLoad()
 {
@@ -20,9 +26,17 @@ function onLoad()
 	
 	//addUiControl()
 	
+	if (fullscreen_mode)
+		fullscreen()
+	
 	global_angle = 0;
 	setInterval(update, 30);
 	//update();
+}
+
+function fullscreen(){
+	//canvas.webkitRequestFullScreen()
+
 }
 
 function addUiControl()
@@ -65,98 +79,21 @@ function initCanvas()
 			break;
 		}
 	}
+		
+	g.camera = new Camera(45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)	
+	g.scene = new Scene()
+	connectMouseEvents(canvas)
 	
-	canvas.addEventListener("mousedown", handleMouseDown, false)
-	canvas.addEventListener("mouseup", handleMouseUp, false)
-	canvas.addEventListener("mousemove", handleMouseMove, false)
-	this.canvas.addEventListener('mousewheel', handleMouseWheel, false);
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
+		
+	gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.BLEND)
 	
+	// At the current moment i don't know exactily meanings of this attributes
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)	
+	gl.depthFunc(gl.LESS);
 }
 
-//copied from quad_tree.js
-function getCursorPosition(e){
-	if (typeof(e) == 'undefined')
-	{
-		console.log("error pos" , e)
-		return 
-	}
-	var x;
-	var y;
-	if (e.pageX || e.pageY) {
-      x = e.pageX;
-      y = e.pageY;
-    }
-    else {
-      x = e.clientX + document.body.scrollLeft +
-           document.documentElement.scrollLeft;
-      y = e.clientY + document.body.scrollTop +
-           document.documentElement.scrollTop;
-    }
-    
-    x -= canvas.offsetLeft;
-	y -= canvas.offsetTop;
-
-    return (new Point(x, y))
-}
-
-
-function Point(x, y){
-	this.x = x
-	this.y = y
-}
-
-var isPressed = false;
-var lastPressedPos = {}
-var diffPos = new Point(0, 0)
-var posOnMouseDown = {}
-var posOnMouseUp  = {}
-
-// TODO make a raytracer
-var mousePos = new Point(0 ,0 )
-
-function handleMouseDown(e)
-{
-	//console.log("mousedown", e)	
-	mousePos = getCursorPosition(e);
-	lastPressedPos = mousePos;
-	isPressed = true	
-	posOnMouseDown  = new Point(mousePos.x, mousePos.y)
-}
-
-function handleMouseMove(e)
-{
-	mousePos = getCursorPosition(e);
-	if (isPressed)
-	{		
-		diffPos.x = (mousePos.x - lastPressedPos.x);
-		diffPos.y = (mousePos.y - lastPressedPos.y);
-		rotationAngle[0] += diffPos.y
-		rotationAngle[1] += diffPos.x
-		lastPressedPos = mousePos;
-	}
-	else
-	{
-	}
-}
-
-var zoom = 0
-
-function handleMouseWheel(e)
-{
-	if (e.wheelDelta > 0)
-		zoom += 1
-	else
-		zoom -= 1
-	//console.log("wheel event", e)
-}
-
-
-function handleMouseUp(e)
-{
-	var mousePos = getCursorPosition(e);
-	posOnMouseDown  = new Point(mousePos.x, mousePos.y)
-	isPressed = false;	
-}
 
 function initShaders(){	
 	shaderManager = new ShaderManager()	
@@ -165,12 +102,30 @@ function initShaders(){
 var cellCount = {};
 var boxScale = {};
 
-function initBuffers(){	
+function initBuffers(){
+	var shader = shaderManager.getProgram('wireframe')	
+	
+	g.objects.ground = (new Ground()).setShader(shader)
+	g.scene.add(g.objects.ground)
+	
+	
+	g.objects.cubes.push((new Cube()).setShader(shader))
+	g.scene.add(g.objects.cubes[0])
+	/*
+	var ground = new Ground().setShader(shader)
+	for (var i = 0; i < 10; ++i)
+	{
+		ground.add((new Cube()).setShader(shader))
+	}*/
+	
+	
+	
 	//Scene.add(Ground, {program : "wireframe"})
+	/*
 	groundCross =  (new Cross).setShader(shaderManager.getProgram('flat'))
 	
-	var shader = shaderManager.getProgram('wireframe')	
-	var ground = (new Ground()).setShader(shader)
+	
+	
 	GroundObjects.push(ground)
 	cellCount = ground.getCellCount()
 	boxScale = 1./cellCount;	
@@ -178,49 +133,24 @@ function initBuffers(){
 	//GroundObjects.push((new Ground()).setShader(shader))
 	
 	groundCube = (new Cube()).setShader(shader)
-	for (var i = 0; i < 50; ++i)
+	for (var i = 0; i < 10; ++i)
 	{
 		Objects.push((new Cube()).setShader(shader))
 		Positions.push({x:0, y:0})
 	}
-	
-		
-	pMatrix = mat4.create();
-	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
-	cameraMatrix = mat4.create()
-	mat4.identity(cameraMatrix);
+	* */			
 }
 
 //StackMatrix.push
 //StackMatrix.pop 
 
-function DrawGround(){
-	GroundObjects[0].getShader().enable()
-	var VPMatrix = mat4.create()	
-	mat4.multiply(VPMatrix, pMatrix, cameraMatrix) 
-	for (var idx = 0; idx < GroundObjects.length; ++idx){
-		var curObject = GroundObjects[idx]		
-				
-		var mat = curObject.getMotionMatrix();		
-		
-				
-		// TODO replace to matrix stack		
-		mat4.identity(mat)
-		//mat4.translate( mat, mat, moveDist)
-		//mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)	
-		mat4.multiply(mat, VPMatrix, mat);
-		
-		if (idx == 0)
-		{
-			mat4.rotateX(mat, mat, Math.PI * 90 / 180.)
-		}
-		else
-		{
-			//mat4.translate(mat, mat, [0, 0, 0])
-			mat4.translate(mat, mat, [0, 1, 1])
-		}
-		curObject.draw()		
-	}	
+function UpdateGround(){	
+	var VPMatrix = g.camera.getProjViewMatrix()			
+	//var mat = curObject.getMotionMatrix();		
+	
+	// TODO add matrix stack		
+	g.objects.ground.reset()
+	g.objects.ground.rotateX(toRad(90))
 }
 
 
@@ -247,10 +177,10 @@ function updateCoord(val)
 
 
 
-function MoveObjectToCell(mat, row, col)
+function MoveObjectToCell(curObjects, row, col)
 {		
 	// i made a mistake somewhere and don't know exactly why swapped col and row
-	var groundHeight = GroundObjects[0].getHeight(col, row);
+	var groundHeight = g.objects.ground.getHeight(col, row);
 	// "-" because z is reversed
 	var boxHeight = -groundHeight / boxScale + 1;
 	
@@ -258,42 +188,37 @@ function MoveObjectToCell(mat, row, col)
 	var cellSize = 1	
 	var objectLen = 2
 	
+	// lift cube to a half of it size and set initial pos as 0
 	// translate to 0 0
-	mat4.translate( mat, mat, [objectLen/2, boxHeight, objectLen/2])
-	mat4.translate( mat, mat, [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
+	curObjects.translate( [objectLen/2, boxHeight, objectLen/2])
+	curObjects.translate( [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
 }
 
 var x = 0
 var y = 0
-function DrawObjects(){	
-	Objects[0].getShader().enable()
-	var VPMatrix = mat4.create()	
-	mat4.multiply(VPMatrix, pMatrix, cameraMatrix) 
-	for (var idx = 0; idx < Objects.length; ++idx){		
-		var curObject = Objects[idx]		
-		var mat = curObject.getMotionMatrix();
+function UpdateObjects(){	
+	g.objects.cubes[0].getShader().enable()	
+	for (var idx = 0; idx < g.objects.cubes.length; ++idx){		
+		var curObject = g.objects.cubes[idx]		
 		
 		// TODO replace to matrix stack		
-		mat4.identity(mat)
-		mat4.multiply(mat,  VPMatrix, mat) 
-		// lift cube to a half of it size and set initial pos as 0
-		
-		//mat4.translate( mat, mat, moveDist)
-		//mat4.rotateY(mat, mat, Math.PI * global_angle / 180.)
-		mat4.scale(mat, mat, [boxScale, boxScale, boxScale])			
-		
+		curObject.reset()		
+				
+		curObject.scale([boxScale, boxScale, boxScale])			
+	
+		// it is not a view part, because it is a part of model
 		position = Positions[idx]
-		//position.x = idx
-		//position.y = 0
 		position.x = updateCoord(position.x)
 		position.y = updateCoord(position.y)		
 		
-		
-		
-		MoveObjectToCell(mat, position.y, position.x)				
-		curObject.draw()		
+		MoveObjectToCell(curObjects, position.y, position.x)				
 	}	
 }
+
+function GameModel(){
+}
+
+
 
 /* unproject - convert screen coordinate to WebGL Coordinates 
  *   winx, winy - point on the screen 
@@ -317,8 +242,8 @@ function unproject(winx,winy,winz,mat,viewport){
 function getGroundZeroPos(MVPMatrix)
 {
 	var viewport = [0, 0, gl.viewportWidth, gl.viewportHeight]
-	var invertedY = gl.viewportHeight - mousePos.y
-	var invertedX = /*gl.viewportWidth - */mousePos.x
+	var invertedY = gl.viewportHeight - mouseAttrs.mousePos.y
+	var invertedX = /*gl.viewportWidth - */mouseAttrs.mousePos.x
 
 
 	var mat =  mat4.identity(mat4.create());
@@ -339,25 +264,22 @@ function getGroundZeroPos(MVPMatrix)
 }
 
 function DrawGroundPosObjects()
-{		
-	if (isPressed)
+{	
+	if (mouseAttrs.isPressed)
 	{
 		return
 	}
 	
-	var MVPMatrix =  mat4.create();		
-	//console.log("MVPMatrix", MVPMatrix)
-	mat4.multiply(MVPMatrix, pMatrix, cameraMatrix)	
+	var VPMatrix =  g.camera.getProjViewMatrix()
+	var MVPMatrix = mat4.identity(mat4.create())
+	
 	// Apply horizontal ground model
-	mat4.rotateX(MVPMatrix, MVPMatrix, Math.PI * 90 / 180.)
+	mat4.rotateX(MVPMatrix, VPMatrix, Math.PI * 90 / 180.)
 
 	var zeroPos = getGroundZeroPos(MVPMatrix)
 	
 	DrawGroundCross(MVPMatrix, zeroPos)
 	DrawGroundCube(MVPMatrix, zeroPos)
-	//groundCube
-
-	
 }
 
 function DrawGroundCube(MVPMatrix, zeroPos)
@@ -403,60 +325,52 @@ function DrawGroundCross(MVPMatrix, zeroPos)
 
 var moveDist = [0, -0.5, -3]
 
-function toRad(grad){
+function toRad(grad){	
 	return grad * Math.PI / 180
+}
+
+function arrayToRad(grad){	
+	return [toRad(grad[0]), toRad(grad[1]) , toRad(grad[2])]
 }
 
 
 var FixedAngle = 1
 
-function update()
-{
-	gl.clearColor(0, .1, 0, .8);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-	gl.enable(gl.DEPTH_TEST);
-	gl.enable(gl.BLEND)
-	
-	// At the current moment i don't know exactily meanings of this attributes
-	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)	
-	gl.depthFunc(gl.LESS);
-	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
-	
-	
+function setupCamera(){
 	if (FixedAngle){
 		global_angle = 90
 	}
 	else{
-		global_angle = (global_angle + 1) % 360;
+		global_angle = (global_angle + 0.3) % 360;
 	}
 	
-	moveDist[2] = zoom / 10;	
+	moveDist[2] = mouseAttrs.zoom / 10;	
 	
-	// TOTHINK - is this is a good practice to remake convertation of matrix every time 
-	mat4.perspective(pMatrix, 45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)
-	
-	mat4.identity(cameraMatrix);
-	// Why reverse order
-	mat4.translate(cameraMatrix, cameraMatrix, moveDist)	
-	mat4.rotateX(cameraMatrix, cameraMatrix, toRad(rotationAngle[0]))
-	mat4.rotateY(cameraMatrix, cameraMatrix, toRad(rotationAngle[1]))
-	mat4.rotateZ(cameraMatrix, cameraMatrix, toRad(rotationAngle[2]))
-
-
-		
-	//console.log(rotationAngle)
-	
-	mat4.rotateY(cameraMatrix, cameraMatrix, global_angle * Math.PI / 180 )	
-	
-	
-	// ToTHink - render pipeline
-	
-	// TODO reduce count of program changing
-	
-	DrawObjects()
-	
-	DrawGroundPosObjects()
-		
-	DrawGround()	
-	
+	g.camera.reset()
+	g.camera.translate(moveDist)
+	g.camera.rotate(arrayToRad(mouseAttrs.rotationAngle))
+	g.camera.rotateY(toRad(global_angle))
 }
+
+function update()
+{	
+	gl.clearColor(.2, .2, .2, .8);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	setupCamera()
+	
+	UpdateGround()	
+	UpdateObjects()
+	
+	g.scene.render(g.camera)
+	// ToTHink - render pipeline	
+	
+	
+	//DrawObjects()
+	
+	//DrawGroundPosObjects()
+		
+	//DrawGround()		
+}
+
+
