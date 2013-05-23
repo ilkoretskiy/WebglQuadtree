@@ -20,10 +20,18 @@ function InitializeSystems(){
 	g.entityManager.registerSystem(new GameModelSystem());
 }
 
+
+
 function InitializeComponents(){
 	g.entityManager.registerComponent(new BasicPositionComponent());
 	g.entityManager.registerComponent(new RandomPositionComponent());
 	/*..*/
+	
+	// test
+	{
+		var components = g.entityManager.getComponents();
+		for (var i = 0; i < components.length)
+	}	
 }
 
 function InitializeObjects(){
@@ -92,6 +100,7 @@ EntityManager.prototype.registerObject = function(object){
         {
 			var newID = this.generateId();
 			object.setID(newID);
+			this.componentsList[newID] = object			
 			this.componentDictionary[component.FAMILY_ID].push(newID)
 		}        
     }
@@ -108,7 +117,7 @@ EntityManager.prototype.registerSystem = function(system){
 
 EntityManager.prototype.getEntitiesWithComponent = function(componentFamilyId){
     // i don't know how to resolve getting of unexist item, maybe it will be undefiend
-    var enities = this.componentEntityLinks[componentFamilyId];
+    var entities = this.componentEntityLinks[componentFamilyId];
     return entities
 }
 
@@ -123,6 +132,8 @@ function GameModelSystem(){
 GameModelSystem.prototype.update = function(){
 	var entities = EntityManager.getEntitiesWithComponent(PositionComponent.FAMILIY_ID);
 	
+	
+	/*	
 	for (var i = 0; i < entities.length; ++i){
 		var entity = entities[i];
 		// update position		
@@ -130,7 +141,7 @@ GameModelSystem.prototype.update = function(){
 		positionComponent.update();
 		console.log(positionComponent);
 		
-		/*
+
 		var renderComponent = entity.getComponent(RenderComponent.ID);
 		if (renderComponent){
 			renderComponent.update();
