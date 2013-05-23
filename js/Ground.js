@@ -178,5 +178,21 @@ Ground.prototype.draw = function(worldMatrix/*or cameraMatrix*/){
 	gl.disableVertexAttribArray( aBarycentric)
 	gl.disableVertexAttribArray( aVertex)
 }
-	
 
+Ground.prototype.moveObjectToCell = function(curObjects, row, col){		
+	// i made a mistake somewhere and don't know exactly why swapped col and row
+	var groundHeight = this.getHeight(col, row);
+	// "-" because z is reversed
+	
+	// что такое boxScale. Откуда мы знаем что наш объект должен быть в N раз меньше ?
+	var objHeight = -groundHeight / boxScale + 1;
+	
+	// TODO get from ground
+	var cellSize = 1	
+	var objectLen = 2
+	
+	// lift cube to a half of it size and set initial pos as 0
+	// translate to 0 0
+	curObjects.translate( [objectLen/2, boxHeight, objectLen/2])
+	curObjects.translate( [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
+}

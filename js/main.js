@@ -18,6 +18,29 @@ var groundCube = {}
 
 var fullscreen_mode = 1
 
+function onLoad(){
+	InitSystem();
+}
+
+function InitSystem(){
+	TestSystem();
+	setInterval(updateSystem(), 30);
+}
+
+g.positionSystem = {}
+
+function TestSystem(){
+	g.positionSystem = new PositionSystem();
+	
+	var entity = new Entity();
+	entity.setComponent(new RandomModelPositionComponent());
+}
+
+function updateSystem(){
+	g.positionSystem.update()
+}
+
+/*
 function onLoad()
 {
 	initCanvas()	
@@ -33,7 +56,7 @@ function onLoad()
 	setInterval(update, 30);
 	//update();
 }
-
+*/
 function fullscreen(){
 	//canvas.webkitRequestFullScreen()
 
@@ -176,28 +199,9 @@ function updateCoord(val)
 }
 
 
-
-function MoveObjectToCell(curObjects, row, col)
-{		
-	// i made a mistake somewhere and don't know exactly why swapped col and row
-	var groundHeight = g.objects.ground.getHeight(col, row);
-	// "-" because z is reversed
-	var boxHeight = -groundHeight / boxScale + 1;
-	
-	// TODO get from ground
-	var cellSize = 1	
-	var objectLen = 2
-	
-	// lift cube to a half of it size and set initial pos as 0
-	// translate to 0 0
-	curObjects.translate( [objectLen/2, boxHeight, objectLen/2])
-	curObjects.translate( [objectLen * (row  - (cellCount / 2)), 0, objectLen * ( col - (cellCount / 2))])
-}
-
 var x = 0
 var y = 0
-function UpdateObjects(){	
-	g.objects.cubes[0].getShader().enable()	
+function UpdateObjects(){
 	for (var idx = 0; idx < g.objects.cubes.length; ++idx){		
 		var curObject = g.objects.cubes[idx]		
 		
@@ -205,18 +209,24 @@ function UpdateObjects(){
 		curObject.reset()		
 				
 		curObject.scale([boxScale, boxScale, boxScale])			
-	
-		// it is not a view part, because it is a part of model
-		position = Positions[idx]
-		position.x = updateCoord(position.x)
-		position.y = updateCoord(position.y)		
 		
-		MoveObjectToCell(curObjects, position.y, position.x)				
+		var modelObj = GameModel.getObject(i)
+		ground.moveObjectToCell(curObject, modelObj.y, modelObj.x)
+		//MoveObjectToCell(curObjects, modelObj.y, modelObj.x)
 	}	
 }
 
 function GameModel(){
 }
+
+GameModel.prototype.makeIteration = function(){
+	for (var idx = 0; idx < g.objects.cubes.length; ++idx){	
+		var obj = g.objects.some_model_cubes[idx]
+		obj.x = updateCoord(obj.x)
+		obj.y = updateCoord(obj.y)		
+	}
+}
+
 
 
 
