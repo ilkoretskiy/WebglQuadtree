@@ -14,6 +14,15 @@ function ScreenSystem(entityManager, worldSize){
 }
 
 
+ScreenSystem.prototype.getVisiblePart = function(){
+	return {
+		"left" : this.screenPos[0],
+		"top" : this.screenPos[1],
+		"width" : this.VisibleSizeOfWorld[0],
+		"height" : this.VisibleSizeOfWorld[1]
+	}
+}
+
 ScreenSystem.prototype.update = function(){
 	this.screenPos = [0, 0]
 	var mainCharactersEntities = this.entityManager.getEntitiesWithComponent(this.mainCharacterComponentFamilyID);
