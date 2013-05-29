@@ -213,16 +213,19 @@ test ("TestWorldSystem", function()
 				ctx.fillStyle = 'white';
 				ctx.fill();
 				
+				// update positions of entities
 				system.update(dt);
-				backgroundSystem.draw(ctx, {"width" : canvas.width, "height" : canvas.height});
-				
-				system.draw(ctx, {"width" : canvas.width, "height" : canvas.height});
-				
+				// update visible part ot the world
 				screen.update()
-				screen.draw(ctx, {"width" : canvas.width, "height" : canvas.height});
+				var visibleRect = screen.getVisiblePart()
+				
+				
+				var canvasSize = {"width" : canvas.width, "height" : canvas.height};				
+				backgroundSystem.draw(ctx, canvasSize, visibleRect);				
+				system.draw(ctx, canvasSize);
+				screen.draw(ctx, canvasSize);
 			}, 
-			30);		
-			
+			30);	
 		ok(true)
 	}
 )
