@@ -158,7 +158,7 @@ BackgroundSystem.prototype.draw = function(ctx, canvasSize, visibleRect ){
 		*/
 		
 		// level 0 - 
-		var left = clamp(texture.width * visiblePart.left, 0, texture.width / 2);
+		var left = clamp(texture.width * visiblePart.left, 0, w);
 		var right = clamp(texture.width * visiblePart.right, 0, texture.width );
 		
 		//console.log(left, right)
