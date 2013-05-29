@@ -168,24 +168,30 @@ test ("TestWorldSystem", function()
 			entityManager.registerEntity(ship);
 		}
 		
+		LoadImage('wave1', "img/wave.png");
+		LoadImage('wave2', "img/wave_ver2.png");
 		
-		var waveObj = new Image();		
-		LoadImage('wave', "img/wave.png");
-		var waveTextureComponent = new TextureComponent(g.ctx, g.resources["wave"])
-		var foregroundObject = new Entity();
-		
-
-		var waveObjHeight = 200; // hardcode
-		
+		var waveObjHeight = 200; // hardcode		
 		var waveAmplitude = 20;
-		var foregroundComponent = new ForegroundComponent(0, waveObjHeight + waveAmplitude * 2);
+		var foregroundComponent = new ForegroundComponent(0, waveObjHeight + waveAmplitude);
 		entityManager.registerComponent( foregroundComponent );
 		
+		var backgroundDecoratorComponent = new BackgroundDecoratorComponent(0, waveObjHeight + waveAmplitude * 2);
+		entityManager.registerComponent( backgroundDecoratorComponent );
 		
-		foregroundObject.addComponent(foregroundComponent);
+		var waveTextureComponent = new TextureComponent(g.ctx, g.resources["wave1"])
+		var foregroundObject = new Entity();
+		foregroundObject.addComponent(backgroundDecoratorComponent);		
 		foregroundObject.addComponent(waveTextureComponent);
 		foregroundObject.addComponent(new WaveAnimationComponent(waveAmplitude, 4, 0));
 		entityManager.registerEntity(foregroundObject)
+		
+		backgroundDecoratorObject = new Entity();
+		backgroundDecoratorObject.addComponent(foregroundComponent);		
+		var waveTextureComponent = new TextureComponent(g.ctx, g.resources["wave2"])
+		backgroundDecoratorObject.addComponent(waveTextureComponent);
+		backgroundDecoratorObject.addComponent(new WaveAnimationComponent(waveAmplitude, 6, 0));
+		entityManager.registerEntity(backgroundDecoratorObject)
 		
 		
 		LoadImage('bg_level1', 'img/bg.jpg');

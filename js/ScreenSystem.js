@@ -6,6 +6,7 @@ function ScreenSystem(entityManager, worldSize){
 	this.animationComponentID = new AnimationComponent().getFamilyID()
 	this.foregroundComponentID = new ForegroundComponent().getFamilyID()
 	this.mainCharacterComponentFamilyID = (new MainCharacterComponent()).getFamilyID();
+	this.backgroundDecorComponentID = new BackgroundDecoratorComponent().getFamilyID();
 	this.worldSize = worldSize
 	
 	
@@ -39,10 +40,46 @@ ScreenSystem.prototype.update = function(){
 }
 
 ScreenSystem.prototype.draw = function(ctx, canvasSize){
-	var entities = this.entityManager.getEntitiesWithComponent(this.positionComponentID);	
-	
 	var spos = this.screenPos;
 	
+	this.drawBackgroundDecor(ctx, canvasSize);
+	this.drawObjects(ctx, canvasSize, spos)
+	this.drawForegroundDecor(ctx, canvasSize);
+}
+
+ScreenSystem.prototype.drawBackgroundDecor = function(ctx, canvasSize){
+	var entities = this.entityManager.getEntitiesWithComponent(this.backgroundDecorComponentID);	
+	for (var i = 0; i < entities.length; ++i){
+		var entity = entities[i];
+		
+		var bgDecorComp = entity.getComponentByFamilyID(this.backgroundDecorComponentID);			
+		var pos = bgDecorComp.getPos();
+		
+		var textureComp = entity.getComponentByFamilyID(this.textureComponentID);	
+		var texture = textureComp.getTexture();
+		
+		var dx = 0;
+		var dy = 0;
+		var animation = entity.getComponentByFamilyID(this.animationComponentID);
+		
+		if (typeof animation !== "undefined" ){
+			// update mustn't be in draw function, but now it's ok
+			animation.update(1)
+			var shift = animation.getShift();			
+			dx = shift.x;
+			dy = shift.y;
+		}
+		
+		ctx.drawImage(
+			texture,
+			dx + pos.x,
+			dy + pos.y
+		);
+	}
+}
+
+ScreenSystem.prototype.drawObjects = function(ctx, canvasSize, spos){
+	var entities = this.entityManager.getEntitiesWithComponent(this.positionComponentID);	
 	// TODO draw all items in one loop and sort it by Z	
 	for (var i = 0; i < entities.length; ++i){		
 		var entity = entities[i];
@@ -83,7 +120,9 @@ ScreenSystem.prototype.draw = function(ctx, canvasSize){
 			);
 		}
 	}	
-	
+}
+
+ScreenSystem.prototype.drawForegroundDecor = function(ctx, canvasSize){
 	var entities = this.entityManager.getEntitiesWithComponent(this.foregroundComponentID);	
 	for (var i = 0; i < entities.length; ++i){
 		var entity = entities[i];
