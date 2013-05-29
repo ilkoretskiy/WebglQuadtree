@@ -6,8 +6,10 @@ System.prototype.update = function(){
 	
 }
 
-function inherit(obj, from){
-    obj.prototype = from
-    obj.prototype.constructor = obj
-}
-
+// taken from http://davidshariff.com/blog/javascript-inheritance-patterns/#contact
+var extendObj = function(childObj, parentObj) {
+    var tmpObj = function () {}
+    tmpObj.prototype = parentObj.prototype;
+    childObj.prototype = new tmpObj();
+    childObj.prototype.constructor = childObj;
+};

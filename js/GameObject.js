@@ -15,7 +15,7 @@ GameObject.prototype.setShader = function(program){
 GameObject.prototype.getShader = function(){			
 	return this.shaderProgram;
 }
-v
+
 /*
 GameObject.prototype.getMVPMatrix = function(){
 	return this.MVPMatrix;
