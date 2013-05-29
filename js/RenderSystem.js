@@ -101,6 +101,11 @@ BackgroundComponent.prototype.getLevel = function(){
 }
 //***********************************************************
 
+function clamp(val, minv, maxv)
+{
+	return Math.max( minv, Math.min(val, maxv));
+}
+
 // Draw background
 function BackgroundSystem(entityManager, worldSize){
 	this.systemId = "Background"
@@ -115,15 +120,22 @@ BackgroundSystem.prototype.update = function(dt){
 }
 
 
-
-BackgroundSystem.prototype.draw = function(ctx, canvasSize ){	
+BackgroundSystem.prototype.draw = function(ctx, canvasSize, visibleRect ){	
 	var w = canvasSize.width
 	var h = canvasSize.height
 	
 	// i expect that layers are sorted by z
 	var entities = this.entityManager.getEntitiesWithComponent(this.backgroundComponentId);	
 	
-	//var posComp = entity.getComponentByFamilyID(this.positionComponentId);	
+	//var posComp = entity.getComponentByFamilyID(this.positionComponentId);
+	
+	// ratio of visible
+	var visiblePart = {
+		'left' : clamp(visibleRect.left / this.worldSize.width, 0., 1.),
+		'top' : clamp(visibleRect.top / this.worldSize.height, 0., 1.),
+		'right' : clamp((visibleRect.left + visibleRect.width) / this.worldSize.width, 0, 1),
+		'bottom' : clamp((visibleRect.top + visibleRect.height) / this.worldSize.height, 0, 1)
+	};
 	
 	// all backgrounds is entities
 	for (var i = 0; i < entities.length; ++i){
@@ -146,8 +158,14 @@ BackgroundSystem.prototype.draw = function(ctx, canvasSize ){
 		*/
 		
 		// level 0 - 
-		var x = 0
-		ctx.drawImage(texture, 0, 0, texture.width, texture.height, x, 0, texture.width, h)
+		var left = clamp(texture.width * visiblePart.left, 0, texture.width / 2);
+		var right = clamp(texture.width * visiblePart.right, 0, texture.width );
+		
+		//console.log(left, right)
+		//var right = texture.width * visiblePart.right; 
+		//console.log(visiblePart.left, visiblePart.right);
+		//ctx.drawImage(texture, 1300, 0, 1310, h, 0, 0, texture.width, h)
+		ctx.drawImage(texture, left, 0, w, h, 0, 0, w, h)
 		// mock drawing
 		// 
 		// is it static (like stars or sun)
