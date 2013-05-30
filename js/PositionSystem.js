@@ -29,6 +29,54 @@ extendObj(StaticPositionComponent, PositionComponent)
 StaticPositionComponent.prototype.update = function(dt){
 
 }
+
+/*
+ ******************************************************
+ ******************************************************
+*/
+function ManualPositionComponent(worldSize, startPosition){
+	PositionComponent.call(this);
+	// Now all ID setup manually, but later it must be automatically	
+	this.COMPONENT_ID = 5    
+	this.direction = [1, 1]
+	this.worldSize = worldSize;	
+	this.x = startPosition.x;
+	this.y = startPosition.y;
+	this.speed = Math.random() * 2 + 0.4;
+}
+
+extendObj(ManualPositionComponent, PositionComponent);
+
+ManualPositionComponent.prototype.update = function(dt){
+}
+
+ManualPositionComponent.prototype.setPos = function(x, y){
+	this.x = x;
+	this.y = y;
+	this.checkBorderCollision()
+}
+
+ManualPositionComponent.prototype.checkBorderCollision = function(){	
+	if (this.x > this.worldSize.width)
+	{		
+		//this.x = this.worldSize.width
+		this.x = 0
+	}
+	else if(this.x < 0)
+	{
+		this.x = this.worldSize.width	
+	}
+	
+	if (this.y > this.worldSize.height)
+	{
+		this.y = this.worldSize.height
+	}
+	else if(this.y <= 0)
+	{
+		this.y = 0
+	}
+}
+
 /*
  ******************************************************
  ******************************************************

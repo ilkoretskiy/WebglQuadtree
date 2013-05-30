@@ -70,10 +70,16 @@ ScreenSystem.prototype.drawBackgroundDecor = function(ctx, canvasSize){
 			dy = shift.y;
 		}
 		
+
 		ctx.drawImage(
 			texture,
+			0,0 ,
+			texture.width,
+			texture.height,
 			dx + pos.x,
-			dy + pos.y
+			dy + pos.y,
+			canvasSize.width,
+			texture.height
 		);
 	}
 }
@@ -81,7 +87,7 @@ ScreenSystem.prototype.drawBackgroundDecor = function(ctx, canvasSize){
 ScreenSystem.prototype.drawObjects = function(ctx, canvasSize, spos){
 	var entities = this.entityManager.getEntitiesWithComponent(this.positionComponentID);	
 	// TODO draw all items in one loop and sort it by Z	
-	for (var i = 0; i < entities.length; ++i){		
+	for (var i = 0; i < entities.length; ++i){				
 		var entity = entities[i];
 		// update position		
 		var positionComponent = entity.getComponentByFamilyID(this.positionComponentID);
@@ -111,7 +117,9 @@ ScreenSystem.prototype.drawObjects = function(ctx, canvasSize, spos){
 				var shift = animation.getShift();
 				dx = shift.x;
 				dy = shift.y;
-			}
+			}	
+
+			
 			
 			ctx.drawImage(
 				texture,
@@ -145,10 +153,16 @@ ScreenSystem.prototype.drawForegroundDecor = function(ctx, canvasSize){
 			dy = shift.y;
 		}
 		
+
 		ctx.drawImage(
 			texture,
+			0,0 ,
+			texture.width,
+			texture.height,
 			dx + pos.x,
-			dy + pos.y
+			dy + pos.y,
+			canvasSize.width,
+			texture.height
 		);
 	}
 }

@@ -111,8 +111,7 @@ function BackgroundSystem(entityManager, worldSize){
 	this.systemId = "Background"
 	this.entityManager = entityManager
 	this.worldSize	= worldSize
-	this.backgroundComponentId = new BackgroundComponent().getFamilyID()
-	//this.positionComponentId = new PositionComponent().getFamilyID()
+	this.backgroundComponentId = new BackgroundComponent().getFamilyID()	
 }
 
 BackgroundSystem.prototype.update = function(dt){
@@ -147,38 +146,24 @@ BackgroundSystem.prototype.draw = function(ctx, canvasSize, visibleRect ){
 		
 		var level = bgComp.getLevel()
 		
-		/*
-		var x = this.canvas.width * posInPerc.x
-		ctx.fillStyle = 'black';
-		ctx.lineWidth = 1
-		ctx.beginPath()
-		ctx.moveTo(x, 0);
-		ctx.lineTo(x, h + 1);
-		ctx.stroke();
-		*/
-		
-		// level 0 - 
-		var left = clamp(texture.width * visiblePart.left, 0, texture.width - w);
+		var left = clamp(texture.width * visiblePart.left, 0, texture.width);
 		var right = clamp(texture.width * visiblePart.right, 0, texture.width );
 		
-		//console.log(left, right)
-		//var right = texture.width * visiblePart.right; 
-		//console.log(visiblePart.left, visiblePart.right);
-		//ctx.drawImage(texture, 1300, 0, 1310, h, 0, 0, texture.width, h)
-		ctx.drawImage(texture, left, 0, w, h, 0, 0, w, h)
-		// mock drawing
-		// 
-		// is it static (like stars or sun)
-			//draw
+		var tw = texture.width;
+		var th = texture.height;				
 		
-		// get layer distance(level)
-		// compute visible part rect
-		
-		
-		
-		// is it repeated
-		
-		// draw
+		// make it repeated
+		if (left + w > tw)
+		{
+			var diff = tw - left
+			ctx.drawImage(texture, left, 0, diff, th, 0, 0, diff, h)
+			ctx.drawImage(texture, 0, 0, w - diff, th, diff, 0, w - diff, h)
+		}
+		else
+		{
+			ctx.drawImage(texture, left, 0, w, th, 0, 0, w, h)
+			
+		}		
 	}
 	
 	

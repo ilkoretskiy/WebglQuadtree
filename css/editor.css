@@ -1,0 +1,44 @@
+#components_count, #components {
+font-family: "Helvetica Neue Light", "HelveticaNeue-Light", "Helvetica Neue", Calibri, Helvetica, Arial, sans-serif;
+}
+
+#components_count {
+
+	padding: 0.5em 0 0.5em 1em;
+
+	color: #FFFFFF;
+	background-color: #0d3349;
+
+	margin: 0;
+	padding: 0;
+	
+	font-size: 1.5em;
+	line-height: 1em;
+	font-weight: normal;
+	font-size : 17;
+
+	border-radius: 5px 5px 0 0;
+	-moz-border-radius: 5px 5px 0 0;
+	-webkit-border-top-right-radius: 5px;
+	-webkit-border-top-left-radius: 5px;
+}
+
+#components {
+	padding: 0.5em 0 0.5em 1em;
+
+	color: #FFFFFF;
+	
+	background-color: #0d3349;
+	margin: 0;
+	padding: 5 0 5 10 ;
+	
+	font-size: 1.5em;
+	line-height: 1em;
+	font-weight: normal;
+	font-size : 15;
+
+	border-radius: 5px 5px 0 0;
+	-moz-border-radius: 5px 5px 0 0;
+	-webkit-border-top-right-radius: 5px;
+	-webkit-border-top-left-radius: 5px;
+}

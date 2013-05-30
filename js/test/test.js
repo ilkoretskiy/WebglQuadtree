@@ -123,16 +123,60 @@ test ("TestDrawSystem", function()
 	}
 )
 
+function GenerateShip(isMain)
+{
+	var textureH =  221;//hardcode
+	var shipOffset = 10;		
+	var animationComponent = new WaveAnimationComponent(20, 5, 1);
+	var textureComponent = new TextureComponent(g.ctx, g.resources["mainship"])
+	var mainCharacterComponent = new MainCharacterComponent();
+		
+	var ship = new Entity();			
+	var startPosition = {'x' : 150, 'y' : g.canvas.height - textureH - shipOffset};
+	var animationComponent = new WaveAnimationComponent(20, 8, 30);
+	
+	
+	ship.addComponent(textureComponent);
+	ship.addComponent(animationComponent);
+	
+	
+	
+	if (isMain){
+		ship.addComponent(mainCharacterComponent);
+		ship.addComponent(new ManualPositionComponent(g.worldSize, startPosition));
+	}
+	else {
+		ship.addComponent(new BasicPositionComponent(g.worldSize, startPosition));
+	}
 
-test ("TestWorldSystem", function() 
+	g.entityManager.registerEntity(ship);
+}
+
+
+function connectKeyboard(host)
+{
+	host.addEventListener( "keydown", doKeyDown, true);
+	host.addEventListener( "keypress", doKeyDown, true);
+}
+
+function doKeyDown(e){	
+	console.log(e)
+	g.pressedKeys.push(e)
+}
+
+_test ("TestWorldSystem", function() 
 	{	
 		var canvas = document.getElementById("drawArea");
 		var ctx = canvas.getContext('2d');
 		
-		var entityManager = new EntityManager();		
-		var worldSize = {'width' : 300, 'height' : 500};
+		connectKeyboard(canvas);
+		g.pressedKeys = []
 		
-		var posComponent = new BasicPositionComponent(worldSize, {'x':0, 'y':0})
+		var entityManager = new EntityManager();		
+		g.entityManager = entityManager
+		g.worldSize = {'width' : 300, 'height' : 500};
+		
+		var posComponent = new BasicPositionComponent(g.worldSize, {'x':0, 'y':0})
 		entityManager.registerComponent(posComponent);
 		
 		var mainCharacterComponent = new MainCharacterComponent();
@@ -142,31 +186,18 @@ test ("TestWorldSystem", function()
 		entityManager.registerComponent(animationComponent);
 		
 		LoadImage('mainship', "img/ship.png");		
-				
+						
 		var textureComponent = new TextureComponent(g.ctx, g.resources["mainship"])
 		entityManager.registerComponent(textureComponent);
-
-		var textureH =  221;//hardcode
-		var shipOffset = 10;
-		// add several objects to world		
-		var shipsCount = 2;		
+		
+		
+		// add several objects to world				
+		var shipsCount = 2;				
 		for (var i = 0; i < shipsCount ; ++i){
-			var ship = new Entity();
-			
-			console.log(canvas.height - textureH - shipOffset)
-			var startPosition = {'x' : i * 150, 'y' : canvas.height - textureH - shipOffset};
-			var animationComponent = new WaveAnimationComponent(20, 8, i * 30);
-			
-			ship.addComponent(new BasicPositionComponent(worldSize, startPosition));
-			if (i === 0)
-			{
-				ship.addComponent(mainCharacterComponent);
-			}
-			ship.addComponent(textureComponent);
-			ship.addComponent(animationComponent);
-			console.log(ship)
-			entityManager.registerEntity(ship);
+			GenerateShip();
 		}
+		
+		GenerateShip(true);
 		
 		LoadImage('wave1', "img/wave.png");
 		LoadImage('wave2', "img/wave_ver2.png");
@@ -202,11 +233,13 @@ test ("TestWorldSystem", function()
 		background.addComponent(bgComp);
 		entityManager.registerEntity(background);
 		
-		var backgroundSystem = new BackgroundSystem(entityManager, worldSize);
+		var backgroundSystem = new BackgroundSystem(entityManager, g.worldSize);
 		
-		var screen = new ScreenSystem(entityManager, worldSize);
+		var screen = new ScreenSystem(entityManager, g.worldSize);
 		
-		var system = new GameModelSystem(entityManager, worldSize);
+		var system = new GameModelSystem(entityManager, g.worldSize);
+		
+		var inputSystem = new InputSystem(entityManager);
 		// update their positions
 		var interval = setInterval()
 		// show them on a "map"
@@ -219,10 +252,16 @@ test ("TestWorldSystem", function()
 				ctx.fillStyle = 'white';
 				ctx.fill();
 				
+				inputSystem.update(dt, g.pressedKeys)
+				g.pressedKeys = []
+				
 				// update positions of entities
 				system.update(dt);
 				// update visible part ot the world
-				screen.update()
+				screen.update(dt);
+				
+				
+				
 				var visibleRect = screen.getVisiblePart()
 				
 				
