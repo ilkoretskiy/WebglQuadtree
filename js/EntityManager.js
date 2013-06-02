@@ -22,7 +22,6 @@ function EntityManager(){
 
 EntityManager.prototype.registerComponent = function(component){
 	this.components.push(component)
-	//console.log("component.id", component.FAMILY_ID)
     this.componentsMap[component.FAMILY_ID] = []
 }
 
@@ -35,9 +34,7 @@ EntityManager.prototype.registerSystem = function(system){
 }
 
 EntityManager.prototype.getEntitiesWithComponent = function(componentFamilyId){
-	//console.log("getEntitiesWithComponent comp family id", componentFamilyId)
-    // i don't know how to resolve getting of unexist item, maybe it will be undefiend
-    //console.log("compmap", this.componentsMap)
+    // i don't know how to resolve getting of unexist item, maybe it will be undefiend    
     var entities = this.componentsMap[componentFamilyId];
     return entities;
 }
@@ -63,7 +60,14 @@ EntityManager.prototype.registerEntity = function(object){
 		// TODO now i must register every new objects, but in future i want to make a "clone" function
         // TODO add some checking for ID collision
         // we know that pushing of new item will be successfully if component registered already
-		this.componentsMap[component.FAMILY_ID].push(object)
+        if (typeof this.componentsMap[component.FAMILY_ID] === 'undefined')
+        {
+			console.log("can't add ", component.FAMILY_ID, component.COMPONENT_ID, " because it is unregistered")
+		}
+		else
+		{
+			this.componentsMap[component.FAMILY_ID].push(object)
+		}
 	}  
 }
 

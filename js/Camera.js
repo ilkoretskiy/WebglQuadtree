@@ -1,6 +1,8 @@
 Camera.prototype = new MovableObject()
 Camera.prototype.constructor = Camera
 
+
+// TODO remove inheritance from movableobject
 function Camera (fovy, aspect, near, far){	
 	MovableObject.call(this)
 	this.projectionMatrix = mat4.create();	

@@ -19,7 +19,7 @@ MovableObject.prototype.lookAt = function(eye, center, up){
 }
 
 MovableObject.prototype.translate = function(shift){
-	mat4.translate(this.viewMatrix, this.viewMatrix, moveDist)	
+	mat4.translate(this.viewMatrix, this.viewMatrix, shift)	
 }
 
 MovableObject.prototype.rotate = function(vec){

@@ -2,99 +2,54 @@ g = {}
 g.camera = {}
 g.mouseHandler = {}
 g.objects = {}
-g.objects.ground = {}
-g.objects.cubes = []
+g.resources = {}
 
 var canvas = {}
 var ground = {}
 var Positions = []
 
-var GroundObjects = []
-var shaderManager = {}
-
-var groundCross = {}
-var groundCube = {}
-
-
 var fullscreen_mode = 1
 
+//**************************************************************
 function onLoad(){
-	InitSystem();
+	Initilize();
+	g.mainLoop = setInterval(UpdateSystem, 30);
 }
 
-function InitSystem(){
-	TestSystem();
-	setInterval(updateSystem(), 30);
+//**************************************************************
+function Initilize(){	
+	LoadImages();
+	
+	g.entityManager = new EntityManager();
+	InitCanvas();
+	InitShaders()	
+	g.worldSize = {'width' : g.mapCanvas.width, 'height' : g.mapCanvas.height};
+	InitCamera();
+	GenerateMap(g.worldSize);
+	InitSystems();
+	InitComponents();
+	InitEntities();
+	
+	
 }
 
-g.positionSystem = {}
-
-function TestSystem(){
-	g.positionSystem = new PositionSystem();
-	
-	var entity = new Entity();
-	entity.setComponent(new RandomModelPositionComponent());
+function InitShaders(){
+	g.shaderManager = new ShaderManager(g.worldCtx);
 }
 
-function updateSystem(){
-	g.positionSystem.update()
-}
-
-/*
-function onLoad()
-{
-	initCanvas()	
-	initShaders();
-	initBuffers();
+//**************************************************************
+function InitCanvas(){
+	g.mapCanvas = document.getElementById("mapArea");
+	g.mapCtx = g.mapCanvas.getContext('2d');	
 	
-	//addUiControl()
-	
-	if (fullscreen_mode)
-		fullscreen()
-	
-	global_angle = 0;
-	setInterval(update, 30);
-	//update();
-}
-*/
-function fullscreen(){
-	//canvas.webkitRequestFullScreen()
-
-}
-
-function addUiControl()
-{
-	var container = document.getElementById("ui-controls")
-	
-	var newEl = document.createElement("button")
-	newEl.class  = "btn"
-	newEl.type = "button"
-	newEl.innerHtml  = "Text" 	
-	newEl.appendChild(document.createTextNode("Click"))
-	
-	container.appendChild(newEl)
-	
-	/*	
-	var controlDiv = document.createElement('div')
-	controlDiv.setAttribute('id' , "innerDiv")
-	container
-	
-	console.log(container)
-	container.innerHtml = html;
-	console.log(container)
-	* */
-}
-
-function initCanvas()
-{
-	canvas = document.getElementById("drawArea");
+	g.worldCanvas = document.getElementById("worldArea");	
 	var names = ["webgl", "experimental-webgl", "webkit-3d", "moz-webgl"]
-	gl = null;
+	var gl = null;	
 	for (var i =0; i < names.length; ++i){
 		try {
-			gl = canvas.getContext(names[i], {antialias : true});			
-			gl.viewportWidth = canvas.width;
-			gl.viewportHeight = canvas.height;
+			gl = g.worldCanvas.getContext(names[i], {antialias : true});			
+			gl.viewportWidth = g.worldCanvas.width;
+			gl.viewportHeight = g.worldCanvas.height;
 		} catch(e) {}
 		
 		if (gl){
@@ -102,10 +57,6 @@ function initCanvas()
 			break;
 		}
 	}
-		
-	g.camera = new Camera(45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)	
-	g.scene = new Scene()
-	connectMouseEvents(canvas)
 	
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight)
 		
@@ -115,117 +66,125 @@ function initCanvas()
 	// At the current moment i don't know exactily meanings of this attributes
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)	
 	gl.depthFunc(gl.LESS);
+	g.worldCtx = gl
 }
 
-
-function initShaders(){	
-	shaderManager = new ShaderManager()	
+//**************************************************************
+function InitCamera(  ){
+	var gl = g.worldCtx
+	g.camera = new Camera(45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)		
+	
+	//g.camera.translate([0, 0, -90])	
+	g.camera.translate([0, 3, -15])
+	g.camera.rotateX(gradToRad(45))	
+	g.camera.rotateY(gradToRad(160))	
 }
 
-var cellCount = {};
-var boxScale = {};
-
-function initBuffers(){
-	var shader = shaderManager.getProgram('wireframe')	
+//**************************************************************
+function GenerateMap (worldSize){
 	
-	g.objects.ground = (new Ground()).setShader(shader)
-	g.scene.add(g.objects.ground)
-	
-	
-	g.objects.cubes.push((new Cube()).setShader(shader))
-	g.scene.add(g.objects.cubes[0])
-	/*
-	var ground = new Ground().setShader(shader)
-	for (var i = 0; i < 10; ++i)
-	{
-		ground.add((new Cube()).setShader(shader))
-	}*/
-	
-	
-	
-	//Scene.add(Ground, {program : "wireframe"})
-	/*
-	groundCross =  (new Cross).setShader(shaderManager.getProgram('flat'))
-	
-	
-	
-	GroundObjects.push(ground)
-	cellCount = ground.getCellCount()
-	boxScale = 1./cellCount;	
-	
-	//GroundObjects.push((new Ground()).setShader(shader))
-	
-	groundCube = (new Cube()).setShader(shader)
-	for (var i = 0; i < 10; ++i)
-	{
-		Objects.push((new Cube()).setShader(shader))
-		Positions.push({x:0, y:0})
-	}
-	* */			
-}
-
-//StackMatrix.push
-//StackMatrix.pop 
-
-function UpdateGround(){	
-	var VPMatrix = g.camera.getProjViewMatrix()			
-	//var mat = curObject.getMotionMatrix();		
-	
-	// TODO add matrix stack		
-	g.objects.ground.reset()
-	g.objects.ground.rotateX(toRad(90))
-}
-
-
-function updateCoord(val)
-{
-	var rnd = Math.random()
-	var shift = 0
-	if (rnd > 0.90)
-	{
-		shift = 1
-	}
-	else if(rnd < 0.02)
-	{
-		shift = -1
-	}
-	val += shift
-	if (val < 0)
-	{
-		val += cellCount
-	}
-	val %= cellCount
-	return val
-}
-
-
-var x = 0
-var y = 0
-function UpdateObjects(){
-	for (var idx = 0; idx < g.objects.cubes.length; ++idx){		
-		var curObject = g.objects.cubes[idx]		
+	var initialMap = [
+			
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0.5, 1, 1, 1, 0.2, 0.3, 0.3, 0],
+			[0, 0, 0, 0.5, 1, 1, 0.2, 0.3, 0.3, 0],
+			[0, 0.5, 0.5, 0.8, 0.8, 0, 0, 0, 0, 0],
+			[0, 0.5, 0.5, 0.8, 0.8, 0.8, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+			
+		];	
 		
-		// TODO replace to matrix stack		
-		curObject.reset()		
-				
-		curObject.scale([boxScale, boxScale, boxScale])			
-		
-		var modelObj = GameModel.getObject(i)
-		ground.moveObjectToCell(curObject, modelObj.y, modelObj.x)
-		//MoveObjectToCell(curObjects, modelObj.y, modelObj.x)
-	}	
+	g.generatedMap = resample(initialMap, worldSize);
+	
+	g.map2d = new Map2D(g.mapCtx, g.generatedMap, worldSize);
+	g.map3d = new Map3D(g.worldCtx, g.generatedMap, worldSize);
+	console.log(worldSize)
 }
 
-function GameModel(){
+//**************************************************************
+function InitSystems(){
+	g.mapSystem = new MapSystem(g.entityManager, g.worldSize, g.map2d.getImage());
+	g.worldDrawSystem = new WorldDrawSystem(g.entityManager, g.worldSize);
+	g.positionSystem = new PositionSystem(g.entityManager, g.worldSize);	
 }
 
-GameModel.prototype.makeIteration = function(){
-	for (var idx = 0; idx < g.objects.cubes.length; ++idx){	
-		var obj = g.objects.some_model_cubes[idx]
-		obj.x = updateCoord(obj.x)
-		obj.y = updateCoord(obj.y)		
-	}
+//**************************************************************
+function InitComponents(){
+	g.entityManager.registerComponent(new PositionComponent());	
+	g.entityManager.registerComponent(new MainCharacterComponent());	
+	g.entityManager.registerComponent(new RenderComponent());
+	g.entityManager.registerComponent(new TerrainComponent());
+	g.entityManager.registerComponent(new ShaderComponent());
+	g.entityManager.registerComponent(new MotionComponent());	
 }
+
+//**************************************************************
+function InitEntities(){
+	GenerateShip(true);
+	GenerateShip(false);
+
+	var terrain = new Entity();
+	terrain.addComponent(new BarycentricTerrainComponent(g.worldCtx, g.map3d));	
+	terrain.addComponent(new ShaderComponent(g.worldCtx, g.shaderManager.getProgram('wireframe')));	
+	var motionComponent = new MotionComponent();
+	
+	var scaleFact = 0.1
+	
+	// set ground horizontally and translate center of ground to 0,0
+	//motionComponent.rotateZ(gradToRad(-90));
+	motionComponent.rotateX(gradToRad(-90));
+	motionComponent.translate([-g.worldSize.width * scaleFact / 2, -g.worldSize.height * scaleFact / 2, 0]);
+	motionComponent.scale([scaleFact, scaleFact, 2])
+	
+	
+	terrain.addComponent(motionComponent);	
+	g.entityManager.registerEntity(terrain);
+}
+
+//**************************************************************
+function LoadImages(){	
+	LoadImage('mainship', "img/ship.png");		
+	LoadImage('wave1', "img/wave.png");
+	LoadImage('wave2', "img/wave_ver2.png");
+	LoadImage('bg_level1', 'img/bg.jpg');
+}
+
+
+//**************************************************************
+function UpdateSystem(){
+	var canvasSize = {"width" : g.mapCanvas.width, "height" : g.mapCanvas.height};					
+	var dt = 1;
+	
+	clearCanvas();
+	
+	g.positionSystem.update(dt);
+	g.mapSystem.draw(g.mapCtx, canvasSize);	
+	//console.log(g.worldDrawSystem)
+	
+	g.worldDrawSystem.draw(g.worldCtx, g.camera);
+	
+}
+
+//**************************************************************
+function clearCanvas(){
+	g.mapCtx.clearRect(0, 0, g.mapCanvas.width, g.mapCanvas.height); 
+	g.mapCtx.rect(0, 0, g.mapCanvas.width, g.mapCanvas.height)
+	g.mapCtx.fillStyle = 'white';
+	g.mapCtx.fill();
+	
+	//g.worldCtx.clearColor(.2, .2, .2, .8);
+	g.worldCtx.clearColor(0, 0, 0, 1);
+	g.worldCtx.clear(g.worldCtx.COLOR_BUFFER_BIT | g.worldCtx.DEPTH_BUFFER_BIT)
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -342,45 +301,4 @@ function toRad(grad){
 function arrayToRad(grad){	
 	return [toRad(grad[0]), toRad(grad[1]) , toRad(grad[2])]
 }
-
-
-var FixedAngle = 1
-
-function setupCamera(){
-	if (FixedAngle){
-		global_angle = 90
-	}
-	else{
-		global_angle = (global_angle + 0.3) % 360;
-	}
-	
-	moveDist[2] = mouseAttrs.zoom / 10;	
-	
-	g.camera.reset()
-	g.camera.translate(moveDist)
-	g.camera.rotate(arrayToRad(mouseAttrs.rotationAngle))
-	g.camera.rotateY(toRad(global_angle))
-}
-
-function update()
-{	
-	gl.clearColor(.2, .2, .2, .8);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
-	setupCamera()
-	
-	UpdateGround()	
-	UpdateObjects()
-	
-	g.scene.render(g.camera)
-	// ToTHink - render pipeline	
-	
-	
-	//DrawObjects()
-	
-	//DrawGroundPosObjects()
-		
-	//DrawGround()		
-}
-
 

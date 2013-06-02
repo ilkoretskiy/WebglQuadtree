@@ -18,4 +18,3 @@ Scene.prototype.render = function(camera){
 		drawableObject.draw(projViewMatrix);
 	}
 }
-

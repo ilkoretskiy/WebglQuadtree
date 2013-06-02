@@ -1,148 +1,4 @@
-function PositionComponent(){
-	Component.call(this);
-	this.FAMILY_ID = "PositionComponent"
-	this.x = 0
-    this.y = 0
-}
-extendObj(PositionComponent, Component)
-	
-PositionComponent.prototype.getPos = function(){
-	return {
-		'x':this.x, 
-		'y':this.y
-		}
-}
-
-/*
- ******************************************************
- ******************************************************
-*/
-function StaticPositionComponent(w, h){
-	PositionComponent.call(this);
-	// Now all ID setup manually, but later it must be automatically	
-	this.COMPONENT_ID = 3
-	this.w = w
-	this.h = h
-}
-extendObj(StaticPositionComponent, PositionComponent)
-	
-StaticPositionComponent.prototype.update = function(dt){
-
-}
-
-/*
- ******************************************************
- ******************************************************
-*/
-function ManualPositionComponent(worldSize, startPosition){
-	PositionComponent.call(this);
-	// Now all ID setup manually, but later it must be automatically	
-	this.COMPONENT_ID = 5    
-	this.direction = [1, 1]
-	this.worldSize = worldSize;	
-	this.x = startPosition.x;
-	this.y = startPosition.y;
-	this.speed = Math.random() * 2 + 0.4;
-}
-
-extendObj(ManualPositionComponent, PositionComponent);
-
-ManualPositionComponent.prototype.update = function(dt){
-}
-
-ManualPositionComponent.prototype.setPos = function(x, y){
-	this.x = x;
-	this.y = y;
-	this.checkBorderCollision()
-}
-
-ManualPositionComponent.prototype.checkBorderCollision = function(){	
-	if (this.x > this.worldSize.width)
-	{		
-		//this.x = this.worldSize.width
-		this.x = 0
-	}
-	else if(this.x < 0)
-	{
-		this.x = this.worldSize.width	
-	}
-	
-	if (this.y > this.worldSize.height)
-	{
-		this.y = this.worldSize.height
-	}
-	else if(this.y <= 0)
-	{
-		this.y = 0
-	}
-}
-
-/*
- ******************************************************
- ******************************************************
-*/
-function BasicPositionComponent(worldSize, startPosition){
-	PositionComponent.call(this);
-	// Now all ID setup manually, but later it must be automatically	
-	this.COMPONENT_ID = 0    
-	this.direction = [1, 1]
-	this.worldSize = worldSize;	
-	this.x = startPosition.x;
-	this.y = startPosition.y;
-	this.speed = Math.random() * 2 + 0.4;
-}
-extendObj(BasicPositionComponent, PositionComponent)
-
-BasicPositionComponent.prototype.update = function(dt){
-	
-	this.checkBorderCollision()		
-    this.x += this.speed * this.direction[0];    
-}
-
-BasicPositionComponent.prototype.checkBorderCollision = function(){	
-	if (this.x > this.worldSize.width)
-	{		
-		this.direction[0] = -1
-	}
-	else if(this.x <= 0)
-	{
-		this.direction[0] = 1
-	}
-	
-	if (this.y > this.worldSize.height)
-	{
-		this.direction[1] = -1
-	}
-	else if(this.y <= 0)
-	{
-		this.direction[1] = 1
-	}
-}
-
-function gradToRad(grad){
-	return grad * Math.PI / 180.
-}
-
-/*
- ******************************************************
- ******************************************************
-*/
-function RandomPositionComponent(){
-    PositionComponent.call(this)
-	this.COMPONENT_ID = 1
-}
-extendObj(RandomPositionComponent, PositionComponent)
-
-RandomPositionComponent.prototype.update = function(){
-    x = randomUpdate(x)
-    y = randomUpdate(y)    
-}
-
-/*
-********************************************************************************
-********************************************************************************
-*/
-function GameModelSystem(entityManager, worldSize){
+function PositionSystem(entityManager, worldSize){
 	this.systemId = "GameModel"
 	this.entityManager = entityManager
 	this.posComponentFamilyID = (new PositionComponent()).getFamilyID();
@@ -152,7 +8,7 @@ function GameModelSystem(entityManager, worldSize){
 	this.worldSize = worldSize
 }
 
-GameModelSystem.prototype.update = function(dt){
+PositionSystem.prototype.update = function(dt){
 	var posComponentFamilyID = (new PositionComponent()).getFamilyID();	
 	var entities = this.entityManager.getEntitiesWithComponent(posComponentFamilyID);	
 			
@@ -170,7 +26,7 @@ GameModelSystem.prototype.update = function(dt){
 	}
 }
 
-GameModelSystem.prototype.draw = function(ctx, canvasSize){
+PositionSystem.prototype.draw = function(ctx, canvasSize){
 	var entities = this.entityManager.getEntitiesWithComponent(this.posComponentFamilyID);	
 	
 	var lineY = 10

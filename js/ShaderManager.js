@@ -5,6 +5,7 @@ var wireframeShader =
 	vs :
 	"attribute vec3 vPosition;\n" +
 	"attribute vec3 aBarycentric;\n" +	
+	"attribute vec4 aColor;\n" +	
 	"varying vec3 vPosOut;\n" +	
 	"varying vec4 vColor;\n" + 
 	"uniform mat4 uMVPMatrix;\n" +
@@ -13,7 +14,7 @@ var wireframeShader =
 	"	gl_PointSize = 5.;\n" +
 	"	gl_Position =  uMVPMatrix *  vec4(vPosition, 1.0);\n" +
 	" 	vPosOut = aBarycentric;\n"+
-	" 	vColor = uColor;\n"+
+	" 	vColor = aColor;\n"+
 	"}\n",
 
 	fs :	
@@ -21,6 +22,8 @@ var wireframeShader =
 	"varying highp vec4 vColor;\n" +
 	"precision mediump float;	\n" + 
 	"void main() {\n" +	
+	//"	gl_FragColor = vColor; \n" +
+	
 		"float threshold = 0.08; \n" +
 		"if (!(any(lessThan( vPosOut, vec3(threshold)))))\n"+
 		"{\n" +
@@ -28,7 +31,7 @@ var wireframeShader =
 		"}\n" +		
 		"	float minVal = threshold - min(min(vPosOut.x, vPosOut.y), vPosOut.z); \n"+
 		"	minVal /= threshold;\n" +
-		"	gl_FragColor = vec4(vColor.rgb, minVal); \n" +
+		"	gl_FragColor = vec4(vColor.rgb, minVal); \n" +		
 	"}"
 }
 
@@ -63,7 +66,7 @@ var flatShader =
 	"}"
 }
 
-function Program (program){
+function Program (gl, program){
 	this.program = program
 	this.getVertex = function(){
 		var aVertex = gl.getAttribLocation(this.program, "vPosition")
@@ -80,7 +83,7 @@ function Program (program){
 }
 
 
-function verifyShader(stype, shader)
+function verifyShader(gl, stype, shader)
 {
 	if(gl.getShaderParameter(shader, gl.COMPILE_STATUS) == false){
 		var error = gl.getShaderInfoLog(shader);
@@ -92,11 +95,14 @@ function verifyShader(stype, shader)
 	}
 }
 
-var ShaderManager = function(){
+var ShaderManager = function(gl){
+	var gl = gl
 	var programs = {}
 	var shaders = []
 
 	var compileShaders = function(){	
+		//var gl = this.gl
+		console.log(gl)
 		for (var idx = 0; idx < shaders.length; ++idx){
 			var shader = shaders[idx]
 			
@@ -104,12 +110,12 @@ var ShaderManager = function(){
 			gl.shaderSource(vertexShader, shader.vs)
 			// maybe add some exception catching
 			gl.compileShader(vertexShader)
-			verifyShader('vx', vertexShader)
+			verifyShader(gl, 'vx', vertexShader)
 			
 			var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
 			gl.shaderSource(fragmentShader, shader.fs)
 			gl.compileShader(fragmentShader)	
-			verifyShader('fs', fragmentShader)
+			verifyShader(gl, 'fs', fragmentShader)
 			
 			var programId = gl.createProgram()
 			gl.attachShader(programId, vertexShader)
@@ -126,7 +132,7 @@ var ShaderManager = function(){
 			gl.deleteShader(vertexShader)
 			gl.deleteShader(fragmentShader)
 			
-			var shaderProgram = new Program(programId)
+			var shaderProgram = new Program(gl, programId)
 			programs[shader.title] = shaderProgram
 		}
 	}	

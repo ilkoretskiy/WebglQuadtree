@@ -1,4 +1,4 @@
-function Component(){
+function Component(){	
 	this.FAMILY_ID = -1;
 	this.COMPONENT_ID = -1;
 }

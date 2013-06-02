@@ -1,8 +1,8 @@
 function MainCharacterComponent()
 {
 	Component.call(this);
-	this.FAMILY_ID = "MainCharacterComponent"
-	this.COMPONENT_ID = 0
+	this.FAMILY_ID = "MainCharacterFamily"
+	this.COMPONENT_ID = "MainCharacterComponent"
 }
 
 extendObj(MainCharacterComponent, Component)
