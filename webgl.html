@@ -5,11 +5,14 @@
 		<link href = "css/bootstrap.min.css" rel = "stylesheet" media = "screen">
 		<link href = "js/test/qunit.css" rel = "stylesheet" media = "screen">
 		<link href = "css/editor.css" rel = "stylesheet" media = "screen">
+		
+		<script src = 'js/test/qunit.js' type = "text/javascript"></script>
+		<script src = 'js/test/test.js' type = "text/javascript"></script>
 		<!--
-		<script src = 'js/gl-matrix.js' type = "text/javascript"></script>
-		<script src = 'js/ShaderManager.js' type = "text/javascript"></script>
+		
+		
 		<script src = 'js/quad_tree.js' type = "text/javascript"></script>
-		<script src = 'js/MovableObject.js' type = "text/javascript"></script>
+		
 		<script src = 'js/GameObject.js' type = "text/javascript"></script>
 		<script src = 'js/Ground.js' type = "text/javascript"></script>		
 		<script src = 'js/Cube.js' type = "text/javascript"></script>		
@@ -19,26 +22,49 @@
 		<script src = 'js/Scene.js' type = "text/javascript"></script>
 		<script src = 'js/main.js' type = "text/javascript"></script>
 		!-->		
+
+		<script src = 'js/gl-matrix.js' type = "text/javascript"></script>
+
+		<script src = 'js/MovableObject.js' type = "text/javascript"></script>
+		<script src = 'js/Camera.js' type = "text/javascript"></script>
+		<script src = 'js/ShaderManager.js' type = "text/javascript"></script>
 		
-		
+		<script src = 'js/Utility.js' type = "text/javascript"></script>
+		<script src = 'js/Ship.js' type = "text/javascript"></script>
+		<script src = 'js/Point.js' type = "text/javascript"></script>
 		<script src = 'js/System.js' type = "text/javascript"></script>
-		<script src = 'js/Component.js' type = "text/javascript"></script>	
+		
+		<script src = 'js/Component.js' type = "text/javascript"></script>		
+		<script src = 'js/TerrainComponent.js' type = "text/javascript"></script>	
+		<script src = 'js/MotionComponent.js' type = "text/javascript"></script>	
+		<script src = 'js/RenderComponent.js' type = "text/javascript"></script>	
 		<script src = 'js/AnimationComponent.js' type = "text/javascript"></script>	
-		<script src = 'js/PositionSystem.js' type = "text/javascript"></script>			
+		<script src = 'js/PositionComponent.js' type = "text/javascript"></script>			
+		<script src = 'js/MapComponent.js' type = "text/javascript"></script>				
+		<script src = 'js/MainCharacterComponent.js' type = "text/javascript"></script>
+		<script src = 'js/ShaderComponent.js' type = "text/javascript"></script>
+		
+		<script src = 'js/MapSystem.js' type = "text/javascript"></script>				
+		<script src = 'js/WorldDrawSystem.js' type = "text/javascript"></script>				
+		<script src = 'js/PositionSystem.js' type = "text/javascript"></script>
 		<script src = 'js/ScreenSystem.js' type = "text/javascript"></script>	
 		<script src = 'js/InputSystem.js' type = "text/javascript"></script>	
-		<script src = 'js/RenderSystem.js' type = "text/javascript"></script>	
-		<script src = 'js/EntityManager.js' type = "text/javascript"></script>	
-		<script src = 'js/MainCharacterComponent.js' type = "text/javascript"></script>
-		<script src = 'js/Entity.js' type = "text/javascript"></script>	
-		<script src = 'js/analog_main.js' type = "text/javascript"></script>				
+		
+		<script src = 'js/EntityManager.js' type = "text/javascript"></script>		
+		<script src = 'js/Entity.js' type = "text/javascript"></script>			
+		<script src = 'js/main.js' type = "text/javascript"></script>				
 		
 	</head>
 	
 	<body onload = "onLoad(); ">
 		<div class = "row">
 			<div class="span2 offset1">
-				<canvas  id = "drawArea" width = "800" height="600">
+				<canvas  id = "mapArea" width = "200" height="200">
+					<span style = "color:red">Browser doesn't support HTML5 Canvas</span>
+				</canvas>
+			</div>
+			<div class="span2 offset1">
+				<canvas  id = "worldArea" width = "800" height="600">
 					<span style = "color:red">Browser doesn't support HTML5 Canvas</span>
 				</canvas>
 			</div>
@@ -47,11 +73,10 @@
 		</div>
 		
 		<div id="components_log"></div>
-		<!--
+		
 		<div id="qunit"></div>
 		<div id="qunit-fixture"></div>		
-		<!--<script src = 'js/test/qunit.js' type = "text/javascript"></script>!-->
-		<!--<script src = 'js/test/test.js' type = "text/javascript"></script>!-->
+		
 		<!--<script src = 'js/bootstrap.min.js' type = "text/javascript"></script>!-->
 		
 		
