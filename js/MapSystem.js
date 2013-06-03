@@ -34,23 +34,13 @@ MapSystem.prototype.draw = function(ctx, canvasSize, generatedMap){
 
 
 MapSystem.prototype.drawMap = function(ctx, canvasSize, visibleRect, generatedMap){		
-	if (this.generatedMapImage == 0){
-		//var width = Math.floor((visibleRect.right - visibleRect.left) * this.worldSize.width);
-		//var height = Math.floor((visibleRect.bottom - visibleRect.top) * this.worldSize.height);
-		
-	}
-	
 	ctx.putImageData(this.generatedMapImage, 0, 0);	
-	
-	//ctx.fillRect
 }
 	
 	
 MapSystem.prototype.drawObjects = function(ctx, canvasSize, visibleRect){
 	// Draw last generated map
 	var entities = this.entityManager.getEntitiesWithComponent(this.posCompID);
-	
-	
 	
 	for (var i = 0; i < entities.length; ++i){
 		var entity = entities[i];

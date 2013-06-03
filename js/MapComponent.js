@@ -7,7 +7,6 @@ extendObj(MapComponent, Component)
 
 function Map2DComponent(map){
 	this.map = map
-	//generateMap
 }
 
 //**************************************************************
@@ -21,16 +20,13 @@ function Map2D(ctx, mapData, worldSize){
 	
 }
 
-Map2D.prototype.fillColormap = function(colormap){
-	
+Map2D.prototype.fillColormap = function(colormap){	
 	colormap.push(255); // blue
 	colormap.push(0x964b00) // brown
 	colormap.push(0x3d2b1f); // blue
 	colormap.push(14527919) // brown
 	colormap.push(0x964b00) // brown
-	colormap.push(0x964b00); // red
-	
-	
+	colormap.push(0x964b00); // red	
 }
 
 Map2D.prototype.getFromColormap = function(val){
@@ -68,6 +64,14 @@ function Map3D(glctx, mapData, worldSize){
 	this.generatedSurface = [];
 	this.barycentric = [];
 	this.generateSurface(mapData, this.generatedSurface, this.barycentric);
+	this.normalizeSurface(this.generatedSurface);
+}
+
+Map3D.prototype.normalizeSurface = function(surface){
+	for (var pointIdx = 0; pointIdx < surface.length; pointIdx += 3){
+			surface[pointIdx] -= this.worldSize.width / 2;
+			surface[pointIdx + 1] -= this.worldSize.height / 2;
+	}
 }
 
 Map3D.prototype.generateSurface = function(mapData, verticies, barycentric){
@@ -125,61 +129,6 @@ Map3D.prototype.generateSurface = function(mapData, verticies, barycentric){
 	}
 }	
 
-Map3D.prototype.generateNormalizedSurface = function(mapData, verticies, barycentric){
-	var z = 0;
-		
-	var halfRow = this.worldSize.height / 2.;
-	var halfCol = this.worldSize.width / 2.;		
-	var dx = 2 / this.worldSize.width ;
-	var dy = 2 / this.worldSize.height;
-		
-	// TODO maybe apply height not as z, but as y value, after this we can do a processing without rotation
-	for (var row = 0; row < this.worldSize.height; ++row){
-		for (var col = 0; col < this.worldSize.width; ++col){				
-			var nCol = col / halfCol - 1. ;
-			var nRow = row / halfRow - 1. ;
-			
-			z = mapData[row][col];				
-			
-			var midPoint = [nCol + dx / 2., nRow + dy / 2., z];
-							
-			verticies.push.apply(verticies, midPoint)
-			verticies.push.apply(verticies, [nCol, nRow, z])
-			verticies.push.apply(verticies, [nCol + dx, nRow, z])
-			
-			verticies.push.apply(verticies, midPoint)
-			verticies.push.apply(verticies, [nCol + dx, nRow, z])
-			verticies.push.apply(verticies, [nCol + dx, nRow + dy, z])
-		
-			verticies.push.apply(verticies, midPoint)
-			verticies.push.apply(verticies, [nCol + dx, nRow + dy, z])
-			verticies.push.apply(verticies, [nCol, nRow + dy, z])
-
-			verticies.push.apply(verticies, midPoint)
-			verticies.push.apply(verticies, [nCol, nRow + dy, z])
-			verticies.push.apply(verticies, [nCol, nRow, z])
-			
-			// i don't know how to repeat list like in python style
-			barycentric.push.apply(barycentric, [
-				1., 0., 0,
-				0., 1., 0,
-				0., 0., 1,
-				
-				1., 0., 0,
-				0., 1., 0,
-				0., 0., 1,
-				
-				1., 0., 0,
-				0., 1., 0,
-				0., 0., 1,
-				
-				1., 0., 0,
-				0., 1., 0,
-				0., 0., 1
-			])
-		}
-	}
-}
 
 Map3D.prototype.getSurface = function(){
 	return this.generatedSurface;

@@ -70,8 +70,7 @@ BarycentricTerrainComponent.prototype.generateColors = function(surface){
 	}
 }
 
-BarycentricTerrainComponent.prototype.uploadBuffers = function(gl, surface){
-	
+BarycentricTerrainComponent.prototype.uploadBuffers = function(gl, surface){	
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(surface.getSurface()), gl.DYNAMIC_DRAW);
 	

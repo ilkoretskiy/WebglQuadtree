@@ -11,8 +11,9 @@ function GenerateShip(isMain)
 	ship.addComponent(textureComponent);
 		
 	var startPosition = {'x' : GenerateNearCenter(g.worldSize.width), 'y' : GenerateNearCenter(g.worldSize.height)};
-	console.log(startPosition)
 	
+	var cubeShapeComponent = new CubeShapeComponent();
+	ship.addComponent(cubeShapeComponent);
 	//var animationComponent = new WaveAnimationComponent(20, 8, 30);
 	//ship.addComponent(animationComponent);
 	

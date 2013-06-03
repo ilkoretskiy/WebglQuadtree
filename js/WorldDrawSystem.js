@@ -13,13 +13,14 @@ function WorldDrawSystem(entityManager, worldSize)
 	this.terrainCompID = (new TerrainComponent()).getFamilyID();		
 	this.shaderCompID = (new ShaderComponent()).getFamilyID();
 	this.motionComponentID = (new MotionComponent()).getFamilyID();
+	this.shapeCompID = (new ShapeComponent()).getFamilyID();
 	this.angle = 0;
 }
 
 
-WorldDrawSystem.prototype.draw = function(gl, camera){
-	
-	this.drawTerrain(gl, camera);		
+WorldDrawSystem.prototype.draw = function(gl, camera){	
+	this.drawTerrain(gl, camera);
+	this.drawObjects();
 }
 
 WorldDrawSystem.prototype.drawTerrain = function(gl, camera){
@@ -40,26 +41,13 @@ WorldDrawSystem.prototype.drawTerrain = function(gl, camera){
 		
 		if (typeof motionComponent !== 'undefined'){
 			modelMatrix = motionComponent.getMatrix();
-			
 		}
 		else{
 			modelMatrix = identityMatrix;
 		}
-		var rotatedModel = mat4.create();
-		
-		
-		//this.angle =  ( this.angle + 1 ) % 360;
-		//mat4.translate
-		//mat4.translate(rotatedModel, modelMatrix, [this.worldSize.width / 2, this.worldSize.height / 2, 0])		
-		//mat4.rotateX( rotatedModel, rotatedModel, gradToRad(-80))
-		//mat4.rotateZ( rotatedModel, rotatedModel, gradToRad(this.angle))
-		//mat4.translate(rotatedModel, rotatedModel, [-this.worldSize.width / 2, -this.worldSize.height / 2, 0])
-		
-		//mat4.multiply(MVPMatrix, projViewMatrix, rotatedModel);
-		
+	
 		mat4.multiply(MVPMatrix, projViewMatrix, modelMatrix);
-		
-
+	
 		var shaderComponent = entity.getComponentByFamilyID(this.shaderCompID); 		
 		if (typeof shaderComponent !== 'undefined'){
 			var shaderProgram = shaderComponent.getShaderProgram();			
@@ -74,6 +62,36 @@ WorldDrawSystem.prototype.drawTerrain = function(gl, camera){
 		}else{
 			console.error("object without shader");
 		}
+	}
+}
 
+WorldDrawSystem.prototype.drawObjects = function(){
+	// common matrix from camera
+	var projViewMatrix = camera.getProjViewMatrix();
+	
+	var entities = this.entityManager.getEntitiesWithComponent(this.posCompID);
+	
+	for (var i = 0; i < entities.length; ++i){
+		var entity = entities[i];
+		
+		var posComponent = entitiy.getComponentByFamilyID(this.posCompID);
+		var shapeComponent = entitiy.getComponentByFamilyID(this.shapeCompID);
+		var shaderComponent = entity.getComponentByFamilyID(this.shaderCompID);
+		var motionComponent = entity.getComponentByFamilyID(this.motionComponentID);
+		
+		if (typeof shapeComponent !== 'undefined' &&
+			typeof shaderComponent !== 'undefined' &&
+			typeof motionComponent !== 'undefined'){
+			
+			var MVPMatrix = precreatedMVPMatrix;
+			// put shape on right place
+			var modelMatrix = motionComponent.getMatrix();
+			
+			
+			
+			// draw
+			mat4.multiply(MVPMatrix, projViewMatrix, modelMatrix);
+			
+		}
 	}
 }

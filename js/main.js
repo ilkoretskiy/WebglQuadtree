@@ -137,8 +137,7 @@ function InitEntities(){
 	
 	// set ground horizontally and translate center of ground to 0,0
 	//motionComponent.rotateZ(gradToRad(-90));
-	motionComponent.rotateX(gradToRad(-90));
-	motionComponent.translate([-g.worldSize.width * scaleFact / 2, -g.worldSize.height * scaleFact / 2, 0]);
+	motionComponent.rotateX(gradToRad(-90));	
 	motionComponent.scale([scaleFact, scaleFact, 2])
 	
 	
@@ -301,4 +300,3 @@ function toRad(grad){
 function arrayToRad(grad){	
 	return [toRad(grad[0]), toRad(grad[1]) , toRad(grad[2])]
 }
-
