@@ -9,12 +9,46 @@ var wireframeShader =
 	"varying vec3 vPosOut;\n" +	
 	"varying vec4 vColor;\n" + 
 	"uniform mat4 uMVPMatrix;\n" +
-	"uniform vec4 uColor;\n" + 
 	"void main() {			\n" +	
 	"	gl_PointSize = 5.;\n" +
 	"	gl_Position =  uMVPMatrix *  vec4(vPosition, 1.0);\n" +
 	" 	vPosOut = aBarycentric;\n"+
 	" 	vColor = aColor;\n"+
+	"}\n",
+
+	fs :	
+	"varying highp vec3 vPosOut;\n" +
+	"varying highp vec4 vColor;\n" +
+	"precision mediump float;	\n" + 
+	"void main() {\n" +	
+	//"	gl_FragColor = vColor; \n" +
+	
+		"float threshold = 0.08; \n" +
+		"if (!(any(lessThan( vPosOut, vec3(threshold)))))\n"+
+		"{\n" +
+		"	discard;\n"+		
+		"}\n" +		
+		"	float minVal = threshold - min(min(vPosOut.x, vPosOut.y), vPosOut.z); \n"+
+		"	minVal /= threshold;\n" +
+		"	gl_FragColor = vec4(vColor.rgb, minVal); \n" +		
+	"}"
+}
+
+var wireframeSolidShader =
+{
+	title : 'wireframeSolid',
+	vs :
+	"attribute vec3 vPosition;\n" +
+	"attribute vec3 aBarycentric;\n" +	
+	"varying vec3 vPosOut;\n" +	
+	"varying vec4 vColor;\n" + 
+	"uniform mat4 uMVPMatrix;\n" +
+	"uniform vec4 uColor;\n" + 
+	"void main() {			\n" +	
+	"	gl_PointSize = 5.;\n" +
+	"	gl_Position =  uMVPMatrix *  vec4(vPosition, 1.0);\n" +
+	" 	vPosOut = aBarycentric;\n"+
+	" 	vColor = uColor;\n"+
 	"}\n",
 
 	fs :	
@@ -138,6 +172,7 @@ var ShaderManager = function(gl){
 	}	
 	shaders.push(wireframeShader)
 	shaders.push(flatShader)
+	shaders.push(wireframeSolidShader)
 	compileShaders()
 			
 	return{

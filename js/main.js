@@ -69,15 +69,23 @@ function InitCanvas(){
 	g.worldCtx = gl
 }
 
+var topView = false
 //**************************************************************
 function InitCamera(  ){
 	var gl = g.worldCtx
 	g.camera = new Camera(45., gl.viewportWidth / gl.viewportHeight, 0.1, 100.)		
 	
-	//g.camera.translate([0, 0, -90])	
-	g.camera.translate([0, 3, -15])
-	g.camera.rotateX(gradToRad(45))	
-	g.camera.rotateY(gradToRad(160))	
+	if (topView)
+	{
+		g.camera.translate([0, 0, -30])
+		g.camera.rotateX(gradToRad(90))
+	}
+	else
+	{
+		g.camera.translate([0, 3, -15])
+		g.camera.rotateX(gradToRad(45))	
+		g.camera.rotateY(gradToRad(-20))	
+	}
 }
 
 //**************************************************************
@@ -121,10 +129,14 @@ function InitComponents(){
 	g.entityManager.registerComponent(new TerrainComponent());
 	g.entityManager.registerComponent(new ShaderComponent());
 	g.entityManager.registerComponent(new MotionComponent());	
+	g.entityManager.registerComponent(new ShapeComponent());	
 }
 
 //**************************************************************
 function InitEntities(){
+	var scaleFact = 0.1
+	g.worldScaleCoef = 0.1
+
 	GenerateShip(true);
 	GenerateShip(false);
 
@@ -132,8 +144,6 @@ function InitEntities(){
 	terrain.addComponent(new BarycentricTerrainComponent(g.worldCtx, g.map3d));	
 	terrain.addComponent(new ShaderComponent(g.worldCtx, g.shaderManager.getProgram('wireframe')));	
 	var motionComponent = new MotionComponent();
-	
-	var scaleFact = 0.1
 	
 	// set ground horizontally and translate center of ground to 0,0
 	//motionComponent.rotateZ(gradToRad(-90));

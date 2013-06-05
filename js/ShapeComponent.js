@@ -17,11 +17,12 @@ function CubeShapeComponent(gl){
 	this.verticies = []
 	this.barycentric = []
 	this.generateSurface(gl);
+	this.uploadBuffers(gl);
 }
 extendObj(CubeShapeComponent, ShapeComponent);
 
 CubeShapeComponent.prototype.generateSurface = function(gl){
-	this.verticies.push.apply(verticies, [
+	this.verticies.push.apply(this.verticies, [
 			-1.0, -1.0, 1.0,  1.0, -1.0, 1.0, 1.0, 1.0, 1.0,
 			-1.0, -1.0, 1.0, 1.0, 1.0, 1.0,	-1.0, 1.0, 1.0,
 			-1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0,
@@ -36,7 +37,7 @@ CubeShapeComponent.prototype.generateSurface = function(gl){
 			-1.0, -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0
 		])
 
-	this.barycentric.push.apply(barycentric, [
+	this.barycentric.push.apply(this.barycentric, [
 			1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
 			1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
 			1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
@@ -52,7 +53,18 @@ CubeShapeComponent.prototype.generateSurface = function(gl){
 		])
 }
 
-CubeShapeComponent.prototype.draw = function(shaderProgram, gl){
+CubeShapeComponent.prototype.uploadBuffers = function(gl){
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.verticies), gl.DYNAMIC_DRAW);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.barycentricBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.barycentric), gl.DYNAMIC_DRAW);
+}
+
+CubeShapeComponent.prototype.draw = function(shaderProgram, gl){	
+	var uColor = gl.getUniformLocation(shaderProgram.program, "uColor");			
+	gl.uniform4fv(uColor, [.7, .7, .7, 1]);
+	
 	var aVertex = shaderProgram.getVertex()
 	gl.enableVertexAttribArray(aVertex);	
 	gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);			

@@ -82,11 +82,16 @@ ManualPositionComponent.prototype.checkBorderCollision = function(){
  ******************************************************
  ******************************************************
 */
+
+function getDir(){
+	return ((Math.random() - 0.5) > 0 ? 1 : -1)
+}
+
 function BasicPositionComponent(worldSize, startPosition){
 	PositionComponent.call(this);
 	// Now all ID setup manually, but later it must be automatically	
 	this.COMPONENT_ID = 0    
-	this.direction = [-1, -1]
+	this.direction = [getDir(), getDir()]
 	this.worldSize = worldSize;	
 	this.x = startPosition.x;
 	this.y = startPosition.y;
@@ -104,30 +109,23 @@ BasicPositionComponent.prototype.update = function(dt){
     //this.x += (this.steeringRadius * Math.sin(this.angle * Math.PI / 360)  + this.xspeed) * this.direction[0];    
     //this.y += (this.steeringRadius * Math.cos(this.angle * Math.PI / 360)  + this.yspeed) * this.direction[1];
     
-    this.x += (this.xspeed) * this.direction[0];
-    this.y += (this.yspeed) * this.direction[1];
+    this.x = (this.x + this.direction[0]) ;//(this.xspeed) * this.direction[0];
+    this.y = (this.y + this.direction[1]);//(this.yspeed) * this.direction[1];
     
     this.angle = (this.angle + 1) % 360
 }
 
 BasicPositionComponent.prototype.checkBorderCollision = function(){	
-	if (this.x > this.worldSize.width)
+	if (this.x > this.worldSize.width || this.x <= 0)
 	{		
-		this.direction[0] = -1
-	}
-	else if(this.x <= 0)
-	{
-		this.direction[0] = 1
+		this.direction[0] = -this.direction[0]
 	}
 	
-	if (this.y > this.worldSize.height)
+	
+	if (this.y > this.worldSize.height || this.y <= 0)
 	{
-		this.direction[1] = -1
-	}
-	else if(this.y <= 0)
-	{
-		this.direction[1] = 1
-	}
+		this.direction[1] = -this.direction[1]
+	}	
 }
 
 function gradToRad(grad){

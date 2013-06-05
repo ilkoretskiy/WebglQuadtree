@@ -83,11 +83,13 @@ Map3D.prototype.generateSurface = function(mapData, verticies, barycentric){
 	var dy = 1;
 	
 	for (var row = 0; row < this.worldSize.height; ++row){
-		for (var col = 0; col < this.worldSize.width; ++col){				
+		for (var col = 0; col < this.worldSize.width; ++col){							
 			var nCol = col;
-			var nRow = row;
 			
-			z = mapData[row][col];				
+			// make a inversing of row, because we must build model from top to bottom for matching with 2d map
+			var nRow = this.worldSize.height - row;
+			
+			z = mapData[row][col];
 			
 			var midPoint = [nCol + dx / 2., nRow + dy / 2., z];
 							

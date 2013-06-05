@@ -12,8 +12,25 @@ function GenerateShip(isMain)
 		
 	var startPosition = {'x' : GenerateNearCenter(g.worldSize.width), 'y' : GenerateNearCenter(g.worldSize.height)};
 	
-	var cubeShapeComponent = new CubeShapeComponent();
+	var cubeShapeComponent = new CubeShapeComponent(g.worldCtx);
 	ship.addComponent(cubeShapeComponent);
+	
+	// TODO make it more obvious
+	ship.addComponent(
+		new ShaderComponent(g.worldCtx, g.shaderManager.getProgram('wireframeSolid'))
+	);
+	
+	// we know that we wanna take a 0.2 of an original size
+	var scaleCoef = 0.2
+	
+	// and calculate how mush bigger(or smaller) then scaled world
+	var relatedScale = scaleCoef / g.worldScaleCoef;
+	var motionComponent = new MotionComponent();//
+	motionComponent.scale([scaleCoef, scaleCoef, scaleCoef]);
+	
+	console.log(relatedScale)
+	motionComponent.translate([-g.worldSize.width / (2 * relatedScale), 5, -g.worldSize.height / (2 * relatedScale)]);
+	ship.addComponent( motionComponent );
 	//var animationComponent = new WaveAnimationComponent(20, 8, 30);
 	//ship.addComponent(animationComponent);
 	
